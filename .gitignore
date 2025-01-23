@@ -22,8 +22,3 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
-
-# Firebase config files
-.firebase/
-.firebaserc
-firebase.json

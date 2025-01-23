@@ -22,6 +22,17 @@ export default function Footer() {
           <div>
             <h3 className="text-lg font-semibold mb-4">{t('footer.quickLinks')}</h3>
             <ul className="space-y-2">
+              <li>
+                <a 
+                  href="/admin" 
+                  className="text-gray-400 hover:text-[#96C881] flex items-center gap-1 group"
+                  title="Admin Portal (Alt + A)"
+                  data-admin-portal
+                >
+                  <span className="opacity-0 group-hover:opacity-100 transition-opacity text-xs">⌘</span>
+                  {t('nav.admin')}
+                </a>
+              </li>
               <li><a href="/about" className="text-gray-400 hover:text-white">{t('nav.about')}</a></li>
               <li><a href="/services" className="text-gray-400 hover:text-white">{t('nav.services')}</a></li>
               <li><a href="/contact" className="text-gray-400 hover:text-white">{t('nav.contact')}</a></li>

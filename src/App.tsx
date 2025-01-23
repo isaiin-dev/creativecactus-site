@@ -4,8 +4,23 @@ import Footer from './components/layout/Footer';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
 
+const useAdminShortcut = () => {
+  React.useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.altKey && e.key.toLowerCase() === 'a') {
+        e.preventDefault();
+        window.location.href = '/admin';
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
+};
+
 function App() {
   const { t } = useTranslation();
+  useAdminShortcut();
 
   return (
     <div className="min-h-screen flex flex-col bg-[#121212]">

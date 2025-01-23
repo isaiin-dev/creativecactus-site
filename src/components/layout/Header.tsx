@@ -35,12 +35,6 @@ export default function Header() {
               {t('nav.contact')}
             </a>
             <LanguageSwitcher />
-            <a 
-              href="/admin" 
-              className="px-4 py-2 rounded-full bg-[#96C881] text-white hover:bg-[#86b873] transition-colors"
-            >
-              {t('nav.admin')}
-            </a>
           </nav>
 
           <button 
@@ -68,12 +62,6 @@ export default function Header() {
             </a>
             <a href="/contact" className="block px-3 py-2 text-gray-300 hover:text-[#E4656E]">
               Contact
-            </a>
-            <a 
-              href="/admin"
-              className="block px-3 py-2 text-[#96C881] hover:text-[#86b873]"
-            >
-              Admin Portal
             </a>
           </div>
         </div>
