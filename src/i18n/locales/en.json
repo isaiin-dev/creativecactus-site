@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About Us",
+    "services": "Services",
+    "contact": "Contact",
+    "admin": "Admin Portal"
+  },
+  "hero": {
+    "title": "Grow Your Brand with",
+    "creative": "Creative",
+    "solutions": "Solutions",
+    "subtitle": "We transform your vision into digital success. Creative strategies, measurable results, and innovative solutions tailored for your business.",
+    "getStarted": "Get Started",
+    "ourServices": "Our Services"
+  },
+  "services": {
+    "title": "Our Services",
+    "subtitle": "Comprehensive digital solutions to help your business thrive in the modern market.",
+    "items": {
+      "brandDesign": {
+        "title": "Brand Design",
+        "description": "Create a memorable brand identity that resonates with your audience."
+      },
+      "webDev": {
+        "title": "Web Development",
+        "description": "Custom websites that combine aesthetics with powerful functionality."
+      },
+      "digitalMarketing": {
+        "title": "Digital Marketing",
+        "description": "Data-driven strategies to increase your online presence and ROI."
+      },
+      "socialMedia": {
+        "title": "Social Media",
+        "description": "Engage your audience and build community across social platforms."
+      },
+      "content": {
+        "title": "Content Creation",
+        "description": "Compelling content that tells your story and drives engagement."
+      },
+      "seo": {
+        "title": "SEO Optimization",
+        "description": "Improve your visibility and rank higher in search results."
+      }
+    }
+  },
+  "about": {
+    "title": "Creative Solutions for",
+    "digitalGrowth": "Digital Growth",
+    "description": "At Creative Cactus, we blend creativity with strategy to help businesses thrive in the digital landscape. Our team of experts is passionate about delivering innovative solutions that drive real results.",
+    "features": [
+      "Data-driven approach to digital marketing",
+      "Creative and unique design solutions",
+      "Expert team with diverse skills",
+      "Focus on measurable results"
+    ],
+    "learnMore": "Learn More About Us"
+  },
+  "footer": {
+    "quickLinks": "Quick Links",
+    "connect": "Connect With Us",
+    "rights": "© 2024 Creative Cactus. All rights reserved.",
+    "privacy": "Privacy Policy",
+    "terms": "Terms of Service",
+    "careers": "Careers"
+  }
+}

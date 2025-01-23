@@ -1,0 +1,67 @@
+{
+  "nav": {
+    "home": "Inicio",
+    "about": "Nosotros",
+    "services": "Servicios",
+    "contact": "Contacto",
+    "admin": "Portal Admin"
+  },
+  "hero": {
+    "title": "Haz Crecer tu Marca con",
+    "creative": "Soluciones",
+    "solutions": "Creativas",
+    "subtitle": "Transformamos tu visión en éxito digital. Estrategias creativas, resultados medibles y soluciones innovadoras adaptadas a tu negocio.",
+    "getStarted": "Comenzar",
+    "ourServices": "Nuestros Servicios"
+  },
+  "services": {
+    "title": "Nuestros Servicios",
+    "subtitle": "Soluciones digitales integrales para ayudar a tu negocio a prosperar en el mercado moderno.",
+    "items": {
+      "brandDesign": {
+        "title": "Diseño de Marca",
+        "description": "Crea una identidad de marca memorable que resuene con tu audiencia."
+      },
+      "webDev": {
+        "title": "Desarrollo Web",
+        "description": "Sitios web personalizados que combinan estética con funcionalidad potente."
+      },
+      "digitalMarketing": {
+        "title": "Marketing Digital",
+        "description": "Estrategias basadas en datos para aumentar tu presencia online y ROI."
+      },
+      "socialMedia": {
+        "title": "Redes Sociales",
+        "description": "Conecta con tu audiencia y construye comunidad en todas las plataformas."
+      },
+      "content": {
+        "title": "Creación de Contenido",
+        "description": "Contenido atractivo que cuenta tu historia y genera engagement."
+      },
+      "seo": {
+        "title": "Optimización SEO",
+        "description": "Mejora tu visibilidad y posiciónate más alto en los resultados de búsqueda."
+      }
+    }
+  },
+  "about": {
+    "title": "Soluciones Creativas para",
+    "digitalGrowth": "Crecimiento Digital",
+    "description": "En Creative Cactus, combinamos creatividad con estrategia para ayudar a las empresas a prosperar en el panorama digital. Nuestro equipo de expertos está apasionado por entregar soluciones innovadoras que impulsan resultados reales.",
+    "features": [
+      "Enfoque basado en datos para marketing digital",
+      "Soluciones de diseño creativas y únicas",
+      "Equipo experto con habilidades diversas",
+      "Enfoque en resultados medibles"
+    ],
+    "learnMore": "Conoce Más Sobre Nosotros"
+  },
+  "footer": {
+    "quickLinks": "Enlaces Rápidos",
+    "connect": "Conéctate con Nosotros",
+    "rights": "© 2024 Creative Cactus. Todos los derechos reservados.",
+    "privacy": "Política de Privacidad",
+    "terms": "Términos de Servicio",
+    "careers": "Carreras"
+  }
+}
