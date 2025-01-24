@@ -54,7 +54,87 @@
       "Expert team with diverse skills",
       "Focus on measurable results"
     ],
-    "learnMore": "Learn More About Us"
+    "learnMore": "Learn More About Us",
+    "hero": {
+      "title": "Transforming Ideas into",
+      "highlight": "Digital Excellence",
+      "subtitle": "Since 2014, we've been at the forefront of digital innovation, helping businesses transform their online presence and achieve remarkable growth."
+    },
+    "story": {
+      "title": "Our Journey of Innovation",
+      "content": "Creative Cactus was born from a vision to bridge the gap between creativity and technology. What started as a small team of passionate digital enthusiasts has grown into a full-service digital agency, trusted by businesses across Mexico and Latin America."
+    },
+    "stats": {
+      "yearsExperience": "Years of Experience",
+      "happyClients": "Happy Clients",
+      "projectsDelivered": "Projects Delivered",
+      "clientSatisfaction": "Client Satisfaction"
+    },
+    "mission": {
+      "title": "Our Mission & Values",
+      "subtitle": "At Creative Cactus, we're driven by a set of core principles that guide everything we do.",
+      "vision": {
+        "title": "Vision",
+        "content": "To be the leading force in digital transformation, empowering businesses to thrive in the digital age."
+      },
+      "mission": {
+        "title": "Mission",
+        "content": "To deliver innovative digital solutions that drive real business growth and create lasting impact."
+      },
+      "values": {
+        "title": "Values",
+        "content": "Innovation, Integrity, Excellence, and Client Success are the cornerstones of our work."
+      }
+    },
+    "team": {
+      "title": "Meet Our Leadership",
+      "subtitle": "The passionate minds behind Creative Cactus",
+      "roles": {
+        "ceo": "CEO & Founder",
+        "creative": "Creative Director",
+        "tech": "Technology Director"
+      },
+      "quotes": {
+        "ceo": "Building the future of digital business, one success story at a time.",
+        "creative": "Turning creative visions into impactful digital experiences.",
+        "tech": "Innovating at the intersection of design and technology."
+      }
+    },
+    "awards": {
+      "title": "Awards & Recognition",
+      "subtitle": "Our commitment to excellence has been recognized by industry leaders.",
+      "items": {
+        "first": {
+          "title": "Agency of the Year 2023 - Digital Innovation Awards"
+        },
+        "second": {
+          "title": "Best Digital Transformation Project 2022"
+        },
+        "third": {
+          "title": "Top Employer in Tech 2021"
+        }
+      }
+    },
+    "testimonials": {
+      "title": "Client Success Stories",
+      "subtitle": "Don't just take our word for it - hear what our clients have to say",
+      "first": {
+        "text": "Creative Cactus transformed our digital presence completely. Their strategic approach and creative solutions helped us achieve a 300% growth in online engagement.",
+        "author": "Isabella Rodríguez",
+        "company": "CEO, TechVision MX"
+      },
+      "second": {
+        "text": "Working with Creative Cactus has been a game-changer for our business. Their team's expertise and dedication to our success exceeded all expectations.",
+        "author": "Miguel Hernández",
+        "company": "Marketing Director, InnovaMex"
+      }
+    },
+    "cta": {
+      "title": "Ready to Transform Your Digital Presence?",
+      "subtitle": "Join our growing family of successful clients or become part of our innovative team.",
+      "contact": "Start Your Project",
+      "careers": "Join Our Team"
+    }
   },
   "footer": {
     "quickLinks": "Quick Links",
