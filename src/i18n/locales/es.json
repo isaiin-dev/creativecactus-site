@@ -143,5 +143,28 @@
     "privacy": "Política de Privacidad",
     "terms": "Términos de Servicio",
     "careers": "Carreras"
+  },
+  "admin": {
+    "login": {
+      "title": "Portal de Administración",
+      "username": "Usuario",
+      "usernamePlaceholder": "Ingresa tu usuario",
+      "password": "Contraseña",
+      "passwordPlaceholder": "Ingresa tu contraseña",
+      "rememberMe": "Recordarme",
+      "forgotPassword": "¿Olvidaste tu contraseña?",
+      "signIn": "Iniciar Sesión",
+      "secureConnection": "Conexión segura. Todos los datos están encriptados.",
+      "accountLocked": "Cuenta temporalmente bloqueada",
+      "tryAgainIn": "Intenta nuevamente en",
+      "errors": {
+        "usernameRequired": "El usuario es requerido",
+        "usernameLength": "El usuario debe tener al menos 3 caracteres",
+        "passwordRequired": "La contraseña es requerida",
+        "passwordLength": "La contraseña debe tener al menos 8 caracteres",
+        "passwordComplexity": "La contraseña debe incluir mayúsculas, minúsculas y números",
+        "invalidCredentials": "Usuario o contraseña inválidos"
+      }
+    }
   }
 }

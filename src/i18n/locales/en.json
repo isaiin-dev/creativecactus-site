@@ -143,5 +143,28 @@
     "privacy": "Privacy Policy",
     "terms": "Terms of Service",
     "careers": "Careers"
+  },
+  "admin": {
+    "login": {
+      "title": "Admin Portal",
+      "username": "Username",
+      "usernamePlaceholder": "Enter your username",
+      "password": "Password",
+      "passwordPlaceholder": "Enter your password",
+      "rememberMe": "Remember me",
+      "forgotPassword": "Forgot password?",
+      "signIn": "Sign In",
+      "secureConnection": "Secure connection. All data is encrypted.",
+      "accountLocked": "Account temporarily locked",
+      "tryAgainIn": "Please try again in",
+      "errors": {
+        "usernameRequired": "Username is required",
+        "usernameLength": "Username must be at least 3 characters",
+        "passwordRequired": "Password is required",
+        "passwordLength": "Password must be at least 8 characters",
+        "passwordComplexity": "Password must include uppercase, lowercase, and numbers",
+        "invalidCredentials": "Invalid username or password"
+      }
+    }
   }
 }

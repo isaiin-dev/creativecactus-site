@@ -3,6 +3,7 @@ import { Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import About from './pages/About';
+import AdminLogin from './pages/AdminLogin';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
 
@@ -29,6 +30,7 @@ function App() {
       <Header />
       <Routes>
         <Route path="/about" element={<About />} />
+        <Route path="/admin" element={<AdminLogin />} />
         <Route path="/" element={
           <main>
             <section className="pt-32 pb-16 px-4 bg-gradient-to-br from-[#96C881]/20 via-[#1a1a1a] to-[#E4656E]/20">
