@@ -147,6 +147,63 @@
   "admin": {
     "login": {
       "title": "Portal de Administración",
+      "email": "Correo electrónico",
+      "emailPlaceholder": "Ingresa tu correo electrónico",
+      "createAccount": "Crear Cuenta",
+      "register": {
+        "title": "Crear Cuenta de Administrador",
+        "subtitle": "Complete el formulario para solicitar una cuenta de administrador",
+        "fullName": "Nombre Completo",
+        "fullNamePlaceholder": "Ingrese su nombre completo",
+        "email": "Correo Electrónico",
+        "emailPlaceholder": "Ingrese su correo electrónico laboral",
+        "password": "Contraseña",
+        "passwordPlaceholder": "Cree una contraseña segura",
+        "confirmPassword": "Confirmar Contraseña",
+        "confirmPasswordPlaceholder": "Vuelva a ingresar su contraseña",
+        "role": "Rol",
+        "department": "Departamento",
+        "departmentPlaceholder": "Seleccione su departamento",
+        "phone": "Número de Teléfono (Opcional)",
+        "phonePlaceholder": "Ingrese su número de teléfono",
+        "submit": "Enviar Registro",
+        "backToLogin": "Volver al Inicio de Sesión",
+        "passwordStrength": {
+          "weak": "Débil",
+          "medium": "Media",
+          "strong": "Fuerte",
+          "veryStrong": "Muy Fuerte"
+        },
+        "departments": {
+          "marketing": "Marketing",
+          "design": "Diseño",
+          "development": "Desarrollo",
+          "sales": "Ventas",
+          "operations": "Operaciones",
+          "management": "Gerencia"
+        },
+        "roles": {
+          "viewer": "Visualizador",
+          "editor": "Editor",
+          "admin": "Administrador"
+        },
+        "success": {
+          "title": "Registro Enviado",
+          "message": "Su solicitud de registro ha sido enviada exitosamente. Un administrador revisará su solicitud y activará su cuenta. Recibirá una notificación por correo electrónico cuando su cuenta sea aprobada.",
+          "returnToLogin": "Volver al Inicio de Sesión"
+        },
+        "errors": {
+          "fullNameRequired": "El nombre completo es requerido",
+          "fullNameLength": "El nombre debe tener al menos 2 caracteres",
+          "emailExists": "Este correo electrónico ya está registrado",
+          "passwordMismatch": "Las contraseñas no coinciden",
+          "roleRequired": "Por favor seleccione un rol",
+          "departmentRequired": "Por favor seleccione un departamento",
+          "invalidPhone": "Por favor ingrese un número de teléfono válido",
+          "captchaRequired": "Por favor complete la verificación CAPTCHA",
+          "tooManyRequests": "Demasiados intentos de registro. Por favor intente más tarde."
+        }
+      },
       "username": "Usuario",
       "usernamePlaceholder": "Ingresa tu usuario",
       "password": "Contraseña",
@@ -158,6 +215,8 @@
       "accountLocked": "Cuenta temporalmente bloqueada",
       "tryAgainIn": "Intenta nuevamente en",
       "errors": {
+        "emailRequired": "El correo electrónico es requerido",
+        "emailInvalid": "Por favor ingresa un correo electrónico válido",
         "usernameRequired": "El usuario es requerido",
         "usernameLength": "El usuario debe tener al menos 3 caracteres",
         "passwordRequired": "La contraseña es requerida",

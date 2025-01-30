@@ -147,6 +147,63 @@
   "admin": {
     "login": {
       "title": "Admin Portal",
+      "email": "Email",
+      "emailPlaceholder": "Enter your email",
+      "createAccount": "Create Account",
+      "register": {
+        "title": "Create Admin Account",
+        "subtitle": "Complete the form below to request an admin account",
+        "fullName": "Full Name",
+        "fullNamePlaceholder": "Enter your full name",
+        "email": "Email Address",
+        "emailPlaceholder": "Enter your work email",
+        "password": "Password",
+        "passwordPlaceholder": "Create a strong password",
+        "confirmPassword": "Confirm Password",
+        "confirmPasswordPlaceholder": "Re-enter your password",
+        "role": "Role",
+        "department": "Department",
+        "departmentPlaceholder": "Select your department",
+        "phone": "Phone Number (Optional)",
+        "phonePlaceholder": "Enter your phone number",
+        "submit": "Submit Registration",
+        "backToLogin": "Back to Login",
+        "passwordStrength": {
+          "weak": "Weak",
+          "medium": "Medium",
+          "strong": "Strong",
+          "veryStrong": "Very Strong"
+        },
+        "departments": {
+          "marketing": "Marketing",
+          "design": "Design",
+          "development": "Development",
+          "sales": "Sales",
+          "operations": "Operations",
+          "management": "Management"
+        },
+        "roles": {
+          "viewer": "Viewer",
+          "editor": "Editor",
+          "admin": "Administrator"
+        },
+        "success": {
+          "title": "Registration Submitted",
+          "message": "Your registration request has been submitted successfully. An administrator will review your request and activate your account. You will receive an email notification once your account is approved.",
+          "returnToLogin": "Return to Login"
+        },
+        "errors": {
+          "fullNameRequired": "Full name is required",
+          "fullNameLength": "Full name must be at least 2 characters",
+          "emailExists": "This email is already registered",
+          "passwordMismatch": "Passwords do not match",
+          "roleRequired": "Please select a role",
+          "departmentRequired": "Please select a department",
+          "invalidPhone": "Please enter a valid phone number",
+          "captchaRequired": "Please complete the CAPTCHA verification",
+          "tooManyRequests": "Too many registration attempts. Please try again later."
+        }
+      },
       "username": "Username",
       "usernamePlaceholder": "Enter your username",
       "password": "Password",
@@ -158,6 +215,8 @@
       "accountLocked": "Account temporarily locked",
       "tryAgainIn": "Please try again in",
       "errors": {
+        "emailRequired": "Email is required",
+        "emailInvalid": "Please enter a valid email address",
         "usernameRequired": "Username is required",
         "usernameLength": "Username must be at least 3 characters",
         "passwordRequired": "Password is required",

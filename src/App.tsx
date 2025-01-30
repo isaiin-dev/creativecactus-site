@@ -2,8 +2,12 @@ import React from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
+import AdminLayout from './components/layout/AdminLayout';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import AdminRegister from './pages/AdminRegister';
 import About from './pages/About';
 import AdminLogin from './pages/AdminLogin';
+import AdminDashboard from './pages/AdminDashboard';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
 
@@ -24,13 +28,40 @@ const useAdminShortcut = () => {
 function App() {
   const { t } = useTranslation();
   useAdminShortcut();
+  const isAdminRoute = window.location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#121212]">
-      <Header />
+      {!isAdminRoute && <Header />}
       <Routes>
         <Route path="/about" element={<About />} />
         <Route path="/admin" element={<AdminLogin />} />
+        <Route path="/admin/register" element={<AdminRegister />} />
+        <Route 
+          path="/admin/dashboard" 
+          element={
+            <ProtectedRoute requiredRoles={['viewer', 'editor', 'admin', 'super_admin']}>
+              <AdminLayout>
+                <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/unauthorized" 
+          element={
+            <div className="min-h-screen bg-[#121212] flex items-center justify-center">
+              <div className="text-center">
+                <h1 className="text-3xl font-bold text-white mb-4">
+                  {t('admin.unauthorized.title')}
+                </h1>
+                <p className="text-gray-400">
+                  {t('admin.unauthorized.message')}
+                </p>
+              </div>
+            </div>
+          }
+        />
         <Route path="/" element={
           <main>
             <section className="pt-32 pb-16 px-4 bg-gradient-to-br from-[#96C881]/20 via-[#1a1a1a] to-[#E4656E]/20">
@@ -161,7 +192,7 @@ function App() {
           </main>
         } />
       </Routes>
-      <Footer />
+      {!isAdminRoute && <Footer />}
     </div>
   );
 }

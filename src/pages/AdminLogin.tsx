@@ -1,24 +1,31 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { Leaf, Loader2, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
+import { login, resetPassword } from '../lib/firebase';
+import { useAuth } from '../contexts/AuthContext';
 
 interface LoginForm {
-  username: string;
+  email: string;
   password: string;
   remember: boolean;
 }
 
 interface ValidationErrors {
-  username?: string;
+  email?: string;
   password?: string;
+  general?: string;
 }
 
 export default function AdminLogin() {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const location = useLocation();
+  const { user } = useAuth();
+  const from = (location.state as any)?.from?.pathname || '/admin/dashboard';
+
   const [form, setForm] = React.useState<LoginForm>({
-    username: '',
+    email: '',
     password: '',
     remember: false,
   });
@@ -49,10 +56,10 @@ export default function AdminLogin() {
   const validateForm = (): boolean => {
     const newErrors: ValidationErrors = {};
     
-    if (!form.username) {
-      newErrors.username = t('admin.login.errors.usernameRequired');
-    } else if (form.username.length < 3) {
-      newErrors.username = t('admin.login.errors.usernameLength');
+    if (!form.email) {
+      newErrors.email = t('admin.login.errors.emailRequired');
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(form.email)) {
+      newErrors.email = t('admin.login.errors.emailInvalid');
     }
 
     if (!form.password) {
@@ -76,65 +83,83 @@ export default function AdminLogin() {
     
     // Clear error when user starts typing
     if (errors[name as keyof ValidationErrors]) {
+      setErrors(prev => {
+        const newErrors = { ...prev };
+        delete newErrors[name as keyof ValidationErrors];
+        delete newErrors.general;
+        return newErrors;
+      });
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!form.email) {
       setErrors(prev => ({
         ...prev,
-        [name]: undefined
+        email: t('admin.login.errors.emailRequired')
       }));
+      return;
+    }
+
+    try {
+      setIsLoading(true);
+      await resetPassword(form.email);
+      // Show success message
+      alert(t('admin.login.resetPasswordSuccess'));
+    } catch (error: any) {
+      setErrors(prev => ({
+        ...prev,
+        general: error.message
+      }));
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (isLocked) {
-      return;
-    }
-
-    if (!validateForm()) {
+    if (isLocked || !validateForm()) {
       return;
     }
 
     setIsLoading(true);
+    setErrors({});
 
     try {
-      // Simulated API call - replace with actual authentication
-      await new Promise(resolve => setTimeout(resolve, 1500));
+      await login(form.email, form.password);
+
+      // Reset attempts on successful login
+      setLoginAttempts(0);
       
-      // For demo purposes - replace with actual authentication logic
-      const isValidCredentials = form.username === 'admin' && form.password === 'Admin123!';
+      // Store session if remember me is checked
+      if (form.remember) {
+        localStorage.setItem('rememberMe', 'true');
+      }
+
+      navigate(from);
+    } catch (error: any) {
+      console.error('Login error:', error);
       
-      if (!isValidCredentials) {
+      // Handle failed attempt
+      if (error.code === 'auth/invalid-credential') {
         const newAttempts = loginAttempts + 1;
         setLoginAttempts(newAttempts);
         
         if (newAttempts >= MAX_LOGIN_ATTEMPTS) {
           setIsLocked(true);
           setLockTimer(LOCK_DURATION);
-          // Log security event
           console.warn('Account locked due to multiple failed attempts');
         }
-        
-        throw new Error(t('admin.login.errors.invalidCredentials'));
-      }
 
-      // Reset attempts on successful login
-      setLoginAttempts(0);
-      
-      // Store session/token securely
-      if (form.remember) {
-        // Implement secure credential storage
+        setErrors({
+          general: t('admin.login.errors.invalidCredentials')
+        });
+      } else {
+        setErrors({
+          general: error.message
+        });
       }
-
-      // Log successful login
-      console.info('Successful login:', form.username);
-      
-      navigate('/admin/dashboard');
-    } catch (error) {
-      console.error('Login error:', error);
-      setErrors(prev => ({
-        ...prev,
-        username: (error as Error).message
-      }));
     } finally {
       setIsLoading(false);
     }
@@ -178,47 +203,47 @@ export default function AdminLogin() {
           )}
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Username Field */}
+            {/* Email Field */}
             <div>
               <label 
-                htmlFor="username" 
+                htmlFor="email" 
                 className="block text-sm font-medium text-gray-300 mb-1"
               >
-                {t('admin.login.username')}
+                {t('admin.login.email')}
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  id="username"
-                  name="username"
-                  value={form.username}
+                  type="email"
+                  id="email"
+                  name="email"
+                  value={form.email}
                   onChange={handleInputChange}
                   disabled={isLocked || isLoading}
                   className={`
                     w-full px-4 py-2 bg-[#242424] border rounded-lg
                     focus:ring-2 focus:outline-none transition-colors
                     disabled:opacity-50 disabled:cursor-not-allowed
-                    ${errors.username 
+                    ${errors.email 
                       ? 'border-red-500 focus:border-red-500 focus:ring-red-500/20' 
                       : 'border-gray-700 focus:border-[#96C881] focus:ring-[#96C881]/20'}
-                    ${form.username && !errors.username ? 'border-[#96C881]' : ''}
+                    ${form.email && !errors.email ? 'border-[#96C881]' : ''}
                     text-white placeholder-gray-500
                   `}
-                  placeholder={t('admin.login.usernamePlaceholder')}
-                  aria-invalid={!!errors.username}
-                  aria-describedby={errors.username ? 'username-error' : undefined}
+                  placeholder={t('admin.login.emailPlaceholder')}
+                  aria-invalid={!!errors.email}
+                  aria-describedby={errors.email ? 'email-error' : undefined}
                 />
-                {form.username && !errors.username && (
+                {form.email && !errors.email && (
                   <CheckCircle2 className="absolute right-3 top-2.5 h-5 w-5 text-[#96C881]" />
                 )}
               </div>
-              {errors.username && (
+              {errors.email && (
                 <p 
-                  id="username-error" 
+                  id="email-error" 
                   className="mt-1 text-sm text-red-500 flex items-center gap-1"
                 >
                   <AlertCircle className="h-4 w-4" />
-                  {errors.username}
+                  {errors.email}
                 </p>
               )}
             </div>
@@ -289,12 +314,26 @@ export default function AdminLogin() {
                 </span>
               </label>
               <a 
-                href="/admin/recover-password"
+                href="#"
+                onClick={(e) => {
+                  e.preventDefault();
+                  handleResetPassword();
+                }}
                 className="text-sm text-[#96C881] hover:text-[#86b873] transition-colors"
               >
                 {t('admin.login.forgotPassword')}
               </a>
             </div>
+
+            {/* General Error Message */}
+            {errors.general && (
+              <div className="p-3 bg-red-900/20 border border-red-900/50 rounded-lg">
+                <p className="text-sm text-red-500 flex items-center gap-1">
+                  <AlertCircle className="h-4 w-4" />
+                  {errors.general}
+                </p>
+              </div>
+            )}
 
             {/* Submit Button */}
             <button
@@ -314,6 +353,16 @@ export default function AdminLogin() {
                 t('admin.login.signIn')
               )}
             </button>
+
+            {/* Create Account Link */}
+            <div className="mt-4 text-center">
+              <Link
+                to="/admin/register"
+                className="text-[#96C881] hover:text-[#86b873] transition-colors"
+              >
+                {t('admin.login.createAccount')}
+              </Link>
+            </div>
           </form>
         </div>
 
