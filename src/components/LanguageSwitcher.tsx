@@ -4,10 +4,13 @@ import { Globe } from 'lucide-react';
 
 export default function LanguageSwitcher() {
   const { i18n } = useTranslation();
+  const [currentLang, setCurrentLang] = React.useState(i18n.language || 'es');
 
   const toggleLanguage = () => {
-    const newLang = i18n.language === 'en' ? 'es' : 'en';
-    i18n.changeLanguage(newLang);
+    const newLang = currentLang === 'en' ? 'es' : 'en';
+    i18n.changeLanguage(newLang).then(() => {
+      setCurrentLang(newLang);
+    });
   };
 
   return (
@@ -17,7 +20,7 @@ export default function LanguageSwitcher() {
       aria-label="Toggle language"
     >
       <Globe className="h-4 w-4" />
-      <span className="text-sm font-medium">{i18n.language.toUpperCase()}</span>
+      <span className="text-sm font-medium">{currentLang.toUpperCase()}</span>
     </button>
   );
 }

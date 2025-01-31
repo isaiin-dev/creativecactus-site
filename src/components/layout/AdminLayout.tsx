@@ -1,18 +1,84 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, FolderKanban, Users, Building2, FileBox, DollarSign, BarChart3, Settings, Briefcase } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { logout } from '../../lib/firebase';
 import LanguageSwitcher from '../LanguageSwitcher';
+import { Link, useLocation } from 'react-router-dom';
 
 interface AdminLayoutProps {
   children: React.ReactNode;
+}
+
+interface NavItem {
+  icon: React.ReactNode;
+  label: string;
+  path: string;
+  roles: string[];
 }
 
 export default function AdminLayout({ children }: AdminLayoutProps) {
   const [isSidebarOpen, setIsSidebarOpen] = React.useState(true);
   const { user } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const navItems: NavItem[] = [
+    {
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      label: 'Dashboard',
+      path: '/admin/dashboard',
+      roles: ['viewer', 'editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <FolderKanban className="h-5 w-5" />,
+      label: 'Projects',
+      path: '/admin/projects',
+      roles: ['viewer', 'editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <Briefcase className="h-5 w-5" />,
+      label: 'Services',
+      path: '/admin/services',
+      roles: ['editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <Building2 className="h-5 w-5" />,
+      label: 'Clients',
+      path: '/admin/clients',
+      roles: ['editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <Users className="h-5 w-5" />,
+      label: 'Team',
+      path: '/admin/team',
+      roles: ['admin', 'super_admin']
+    },
+    {
+      icon: <FileBox className="h-5 w-5" />,
+      label: 'Resources',
+      path: '/admin/resources',
+      roles: ['viewer', 'editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <DollarSign className="h-5 w-5" />,
+      label: 'Finance',
+      path: '/admin/finance',
+      roles: ['admin', 'super_admin']
+    },
+    {
+      icon: <BarChart3 className="h-5 w-5" />,
+      label: 'Reports',
+      path: '/admin/reports',
+      roles: ['editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <Settings className="h-5 w-5" />,
+      label: 'Settings',
+      path: '/admin/settings',
+      roles: ['super_admin']
+    }
+  ];
 
   const handleLogout = async () => {
     try {
@@ -35,18 +101,11 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         `}
       >
         <div className="p-4 flex items-center justify-between">
-          <div className="flex items-center">
-            <img
-              src="/logo.png"
-              alt="Creative Cactus"
-              className="h-8 w-auto"
-            />
-            {isSidebarOpen && (
-              <span className="ml-2 text-white font-semibold">
-                Admin Portal
-              </span>
-            )}
-          </div>
+          <img
+            src="/logo.png"
+            alt="Creative Cactus"
+            className="h-8 w-auto"
+          />
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
             className="text-gray-400 hover:text-white transition-colors"
@@ -60,8 +119,32 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
         </div>
 
         {/* Navigation */}
-        <nav className="mt-8">
-          {/* Add your navigation items here */}
+        <nav className="mt-8 px-3">
+          <div className="space-y-1">
+            {navItems.map((item) => {
+              const isVisible = user?.role && item.roles.includes(user.role);
+              if (!isVisible) return null;
+
+              const isActive = location.pathname === item.path;
+              return (
+                <Link
+                  key={item.path}
+                  to={item.path}
+                  className={`
+                    flex items-center gap-3 px-3 py-2 rounded-lg
+                    transition-colors
+                    ${isActive 
+                      ? 'bg-[#96C881] text-white' 
+                      : 'text-gray-400 hover:text-white hover:bg-[#242424]'}
+                    ${!isSidebarOpen && 'justify-center'}
+                  `}
+                >
+                  {item.icon}
+                  {isSidebarOpen && <span>{item.label}</span>}
+                </Link>
+              );
+            })}
+          </div>
         </nav>
       </div>
 

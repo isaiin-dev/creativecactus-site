@@ -9,7 +9,20 @@ import {
   sendEmailVerification,
   User as FirebaseUser
 } from 'firebase/auth';
-import { getFirestore, doc, getDoc, setDoc, serverTimestamp } from 'firebase/firestore';
+import { 
+  getFirestore, 
+  doc, 
+  getDoc, 
+  setDoc, 
+  collection,
+  query,
+  orderBy,
+  getDocs,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp 
+} from 'firebase/firestore';
+import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -23,6 +36,7 @@ const firebaseConfig = {
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
 export const db = getFirestore(app);
+export const storage = getStorage(app);
 
 export type UserRole = 'super_admin' | 'admin' | 'editor' | 'viewer';
 
@@ -33,6 +47,21 @@ export interface UserData {
   displayName?: string;
   lastLogin?: Date;
   createdAt: Date;
+}
+
+export interface Service {
+  id: string;
+  title: string;
+  description: string;
+  icon: string;
+  imageUrl?: string;
+  price?: number;
+  status: 'active' | 'inactive';
+  category: string;
+  order: number;
+  features: string[];
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export const getUserRole = async (uid: string): Promise<UserRole | null> => {
@@ -135,4 +164,57 @@ export const registerUser = async (data: RegistrationData): Promise<void> => {
   } catch (error: any) {
     throw new Error(error.message);
   }
+};
+
+export const createService = async (service: Omit<Service, 'id' | 'createdAt' | 'updatedAt'>) => {
+  const servicesRef = collection(db, 'services');
+  const newService = {
+    ...service,
+    createdAt: serverTimestamp(),
+    updatedAt: serverTimestamp()
+  };
+  
+  const docRef = await setDoc(doc(servicesRef), newService);
+  return docRef;
+};
+
+export const updateService = async (id: string, updates: Partial<Service>) => {
+  const serviceRef = doc(db, 'services', id);
+  await updateDoc(serviceRef, {
+    ...updates,
+    updatedAt: serverTimestamp()
+  });
+};
+
+export const deleteService = async (id: string) => {
+  const serviceRef = doc(db, 'services', id);
+  const serviceDoc = await getDoc(serviceRef);
+  
+  if (serviceDoc.exists()) {
+    const data = serviceDoc.data() as Service;
+    // Delete associated image if exists
+    if (data.imageUrl) {
+      const imageRef = ref(storage, data.imageUrl);
+      await deleteObject(imageRef);
+    }
+  }
+  
+  await deleteDoc(serviceRef);
+};
+
+export const getServices = async () => {
+  const servicesRef = collection(db, 'services');
+  const q = query(servicesRef, orderBy('order', 'asc'));
+  const snapshot = await getDocs(q);
+  
+  return snapshot.docs.map(doc => ({
+    id: doc.id,
+    ...doc.data()
+  })) as Service[];
+};
+
+export const uploadServiceImage = async (file: File) => {
+  const storageRef = ref(storage, `services/${Date.now()}_${file.name}`);
+  await uploadBytes(storageRef, file);
+  return getDownloadURL(storageRef);
 };

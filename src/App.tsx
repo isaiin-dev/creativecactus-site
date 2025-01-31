@@ -8,6 +8,7 @@ import AdminRegister from './pages/AdminRegister';
 import About from './pages/About';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
+import AdminServices from './pages/AdminServices';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
 
@@ -43,6 +44,16 @@ function App() {
             <ProtectedRoute requiredRoles={['viewer', 'editor', 'admin', 'super_admin']}>
               <AdminLayout>
                 <AdminDashboard />
+              </AdminLayout>
+            </ProtectedRoute>
+          } 
+        />
+        <Route 
+          path="/admin/services" 
+          element={
+            <ProtectedRoute requiredRoles={['editor', 'admin', 'super_admin']}>
+              <AdminLayout>
+                <AdminServices />
               </AdminLayout>
             </ProtectedRoute>
           } 
