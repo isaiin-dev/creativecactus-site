@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
@@ -28,56 +28,63 @@ const useAdminShortcut = () => {
 
 function App() {
   const { t } = useTranslation();
+  const location = useLocation();
   useAdminShortcut();
-  const isAdminRoute = window.location.pathname.startsWith('/admin');
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   return (
     <div className="min-h-screen flex flex-col bg-[#121212]">
       {!isAdminRoute && <Header />}
-      <Routes>
-        <Route path="/about" element={<About />} />
-        <Route path="/admin" element={<AdminLogin />} />
-        <Route path="/admin/register" element={<AdminRegister />} />
-        <Route 
-          path="/admin/dashboard" 
-          element={
-            <ProtectedRoute requiredRoles={['viewer', 'editor', 'admin', 'super_admin']}>
-              <AdminLayout>
-                <AdminDashboard />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/admin/services" 
-          element={
-            <ProtectedRoute requiredRoles={['editor', 'admin', 'super_admin']}>
-              <AdminLayout>
-                <AdminServices />
-              </AdminLayout>
-            </ProtectedRoute>
-          } 
-        />
-        <Route 
-          path="/admin/unauthorized" 
-          element={
-            <div className="min-h-screen bg-[#121212] flex items-center justify-center">
-              <div className="text-center">
-                <h1 className="text-3xl font-bold text-white mb-4">
-                  {t('admin.unauthorized.title')}
-                </h1>
-                <p className="text-gray-400">
-                  {t('admin.unauthorized.message')}
-                </p>
-              </div>
-            </div>
-          }
-        />
-        <Route path="/" element={
-          <main>
-            <section className="pt-32 pb-16 px-4 bg-gradient-to-br from-[#96C881]/20 via-[#1a1a1a] to-[#E4656E]/20">
-              <div className="max-w-7xl mx-auto">
+      <main className="flex-1">
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/about" element={<About />} />
+          
+          {/* Admin Routes */}
+          <Route path="/admin" element={<AdminLogin />} />
+          <Route path="/admin/register" element={<AdminRegister />} />
+          <Route 
+            path="/admin/dashboard" 
+            element={
+              <ProtectedRoute requiredRoles={['viewer', 'editor', 'admin', 'super_admin']}>
+                <AdminLayout>
+                  <AdminDashboard />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/services" 
+            element={
+              <ProtectedRoute requiredRoles={['editor', 'admin', 'super_admin']}>
+                <AdminLayout>
+                  <AdminServices />
+                </AdminLayout>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/unauthorized" 
+            element={
+              <div className="min-h-screen bg-[#121212] flex items-center justify-center">
                 <div className="text-center">
+                  <h1 className="text-3xl font-bold text-white mb-4">
+                    {t('admin.unauthorized.title')}
+                  </h1>
+                  <p className="text-gray-400">
+                    {t('admin.unauthorized.message')}
+                  </p>
+                </div>
+              </div>
+            }
+          />
+          
+          {/* Home Route */}
+          <Route path="/" element={
+            <div>
+              <section className="pt-32 pb-16 px-4 bg-gradient-to-br from-[#96C881]/20 via-[#1a1a1a] to-[#E4656E]/20">
+                <div className="max-w-7xl mx-auto">
+                  <div className="text-center">
                   <h1 className="text-5xl md:text-7xl font-bold text-white mb-6">
                     {t('hero.title')}
                     <span className="text-[#E4656E]"> {t('hero.creative')}</span>
@@ -101,12 +108,12 @@ function App() {
                       {t('hero.ourServices')}
                     </a>
                   </div>
+                  </div>
                 </div>
-              </div>
-            </section>
+              </section>
 
-            {/* Services Section */}
-            <section className="py-20 px-4 bg-[#1a1a1a]">
+              {/* Services Section */}
+              <section className="py-20 px-4 bg-[#1a1a1a]">
               <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
                   <h2 className="text-4xl font-bold mb-4 text-white">{t('services.title')}</h2>
@@ -159,10 +166,10 @@ function App() {
                   ))}
                 </div>
               </div>
-            </section>
+              </section>
 
-            {/* About Section */}
-            <section className="py-20 px-4 bg-[#242424] text-white">
+              {/* About Section */}
+              <section className="py-20 px-4 bg-[#242424] text-white">
               <div className="max-w-7xl mx-auto">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center">
                   <div>
@@ -199,10 +206,11 @@ function App() {
                   </div>
                 </div>
               </div>
-            </section>
-          </main>
-        } />
-      </Routes>
+              </section>
+            </div>
+          } />
+        </Routes>
+      </main>
       {!isAdminRoute && <Footer />}
     </div>
   );
