@@ -1,7 +1,7 @@
 import React from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import { Leaf, Loader2, AlertCircle, CheckCircle2, Lock } from 'lucide-react';
+import { Leaf, Loader2, AlertCircle, CheckCircle2, Lock, ArrowLeft } from 'lucide-react';
 import { login, resetPassword } from '../lib/firebase';
 import { useAuth } from '../contexts/AuthContext';
 
@@ -174,13 +174,20 @@ export default function AdminLogin() {
   return (
     <div className="min-h-screen flex flex-col items-center justify-center bg-[#121212] p-4">
       <div className="w-full max-w-md">
-        {/* Logo */}
-        <div className="flex justify-center mb-8">
+        {/* Logo and Home Link */}
+        <div className="flex flex-col items-center mb-8">
           <img
             src="/logo.png"
             alt="Creative Cactus"
             className="h-12 w-auto"
           />
+          <Link
+            to="/"
+            className="mt-4 text-sm text-gray-500 hover:text-[#96C881] transition-colors flex items-center gap-1"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Volver al sitio principal
+          </Link>
         </div>
 
         {/* Login Form */}
@@ -367,7 +374,7 @@ export default function AdminLogin() {
         </div>
 
         {/* Security Notice */}
-        <p className="mt-8 text-center text-sm text-gray-500">
+        <p className="mt-6 text-center text-sm text-gray-500">
           {t('admin.login.secureConnection')}
         </p>
       </div>
