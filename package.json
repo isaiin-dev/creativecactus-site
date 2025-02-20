@@ -17,6 +17,12 @@
     "react-router-dom": "^6.22.3",
     "react-i18next": "^14.1.0",
     "i18next": "^23.10.1",
+    "@tiptap/react": "^2.2.4",
+    "@tiptap/pm": "^2.2.4",
+    "@tiptap/starter-kit": "^2.2.4",
+    "@tiptap/extension-image": "^2.2.4",
+    "@tiptap/extension-link": "^2.2.4",
+    "@tiptap/extension-placeholder": "^2.2.4",
     "react-google-recaptcha": "^3.1.0",
     "firebase": "^10.8.1",
     "@hello-pangea/dnd": "^16.5.0"

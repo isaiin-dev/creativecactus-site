@@ -23,6 +23,7 @@ import {
   serverTimestamp 
 } from 'firebase/firestore';
 import { getStorage, ref, uploadBytes, getDownloadURL, deleteObject } from 'firebase/storage';
+import { enableIndexedDbPersistence, initializeFirestore, CACHE_SIZE_UNLIMITED } from 'firebase/firestore';
 
 const firebaseConfig = {
   apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
@@ -35,8 +36,19 @@ const firebaseConfig = {
 
 const app = initializeApp(firebaseConfig);
 export const auth = getAuth(app);
-export const db = getFirestore(app);
 export const storage = getStorage(app);
+
+// Initialize Firestore with persistence and offline capabilities
+export const db = initializeFirestore(app, {
+  cacheSizeBytes: CACHE_SIZE_UNLIMITED
+});
+
+// Enable offline persistence
+enableIndexedDbPersistence(db).catch((err) => {
+  if (err.code === 'failed-precondition') {
+    console.warn('Multiple tabs open, persistence can only be enabled in one tab at a time.');
+  }
+});
 
 export type UserRole = 'super_admin' | 'admin' | 'editor' | 'viewer';
 
@@ -49,6 +61,123 @@ export interface UserData {
   createdAt: Date;
 }
 
+export interface ContentVersion {
+  id: string;
+  contentId: string;
+  data: any;
+  createdAt: Date;
+  createdBy: string;
+  status: 'draft' | 'pending' | 'published' | 'scheduled';
+  scheduledFor?: Date;
+  approvedBy?: string;
+  approvedAt?: Date;
+}
+
+export interface ContentBlock {
+  id: string;
+  type: 'header' | 'footer' | 'hero' | 'services' | 'testimonials' | 'features';
+  data: any;
+  currentVersion: string;
+  versions: ContentVersion[];
+  lastModified: FirebaseFirestore.Timestamp;
+  lastModifiedBy: string;
+}
+
+export const getContentBlock = async (type: ContentBlock['type']): Promise<ContentBlock | null> => {
+  try {
+    const docRef = doc(db, 'content', type);
+    // Initialize the content block if it doesn't exist
+    const docSnap = await getDoc(docRef);
+    if (!docSnap.exists()) {
+      const initialData: ContentBlock = {
+        id: type,
+        type,
+        data: {},
+        currentVersion: '',
+        versions: [],
+        lastModified: serverTimestamp(),
+        lastModifiedBy: 'system'
+      };
+      await setDoc(docRef, initialData);
+      return initialData;
+    }
+    const data = docSnap.data();
+    return {
+      ...data,
+      id: docSnap.id,
+      lastModified: data.lastModified || serverTimestamp()
+    } as ContentBlock;
+  } catch (error) {
+    console.error('Error fetching content block:', error);
+    return null;
+  }
+};
+
+export const updateContentBlock = async (
+  type: ContentBlock['type'],
+  data: any,
+  userId: string,
+  status: ContentVersion['status'] = 'draft',
+  scheduledFor?: Date
+): Promise<void> => {
+  try {
+    const contentRef = doc(db, 'content', type);
+    const versionRef = doc(collection(db, 'content', type, 'versions'));
+    
+    const version: ContentVersion = {
+      id: versionRef.id,
+      contentId: type,
+      data,
+      createdAt: new Date(),
+      createdBy: userId,
+      status,
+      scheduledFor
+    };
+    
+    await setDoc(versionRef, version);
+    
+    if (status === 'published') {
+      await updateDoc(contentRef, {
+        data,
+        currentVersion: versionRef.id,
+        lastModified: serverTimestamp(),
+        lastModifiedBy: userId
+      });
+    }
+  } catch (error) {
+    console.error('Error updating content block:', error);
+    throw error;
+  }
+};
+
+export const approveContentVersion = async (
+  type: ContentBlock['type'],
+  versionId: string,
+  userId: string
+): Promise<void> => {
+  try {
+    const versionRef = doc(db, 'content', type, 'versions', versionId);
+    
+    await updateDoc(versionRef, {
+      status: 'published',
+      approvedBy: userId,
+      approvedAt: serverTimestamp()
+    });
+    
+    const versionSnap = await getDoc(versionRef);
+    const version = versionSnap.data() as ContentVersion;
+    
+    await updateDoc(doc(db, 'content', type), {
+      data: version.data,
+      currentVersion: versionId,
+      lastModified: serverTimestamp(),
+      lastModifiedBy: userId
+    });
+  } catch (error) {
+    console.error('Error approving content version:', error);
+    throw error;
+  }
+};
 export interface Service {
   id: string;
   title: string;

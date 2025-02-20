@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, LayoutDashboard, FolderKanban, Users, Building2, FileBox, DollarSign, BarChart3, Settings, Briefcase } from 'lucide-react';
+import { LogOut, Menu, X, LayoutDashboard, FolderKanban, Users, Building2, FileBox, DollarSign, BarChart3, Settings, Briefcase, Layout } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { logout } from '../../lib/firebase';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -33,13 +33,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
     {
       icon: <FolderKanban className="h-5 w-5" />,
       label: 'Projects',
-      path: '/admin/projects',
-      roles: ['viewer', 'editor', 'admin', 'super_admin']
-    },
-    {
-      icon: <Briefcase className="h-5 w-5" />,
-      label: 'Services',
-      path: '/admin/services',
+      path: '/admin/projects', 
       roles: ['editor', 'admin', 'super_admin']
     },
     {
@@ -59,6 +53,12 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
       label: 'Resources',
       path: '/admin/resources',
       roles: ['viewer', 'editor', 'admin', 'super_admin']
+    },
+    {
+      icon: <Layout className="h-5 w-5" />,
+      label: 'Content',
+      path: '/admin/content',
+      roles: ['editor', 'admin', 'super_admin']
     },
     {
       icon: <DollarSign className="h-5 w-5" />,

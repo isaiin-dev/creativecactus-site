@@ -1,5 +1,5 @@
 import React from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, Navigate } from 'react-router-dom';
 import Header from './components/layout/Header';
 import Footer from './components/layout/Footer';
 import AdminLayout from './components/layout/AdminLayout';
@@ -9,6 +9,7 @@ import About from './pages/About';
 import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminServices from './pages/AdminServices';
+import AdminContent from './pages/AdminContent';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
 
@@ -56,11 +57,23 @@ function App() {
           <Route 
             path="/admin/services" 
             element={
+              <Navigate to="/admin/content/services" replace />
+            } 
+          />
+          <Route 
+            path="/admin/content" 
+            element={
               <ProtectedRoute requiredRoles={['editor', 'admin', 'super_admin']}>
                 <AdminLayout>
-                  <AdminServices />
+                  <AdminContent />
                 </AdminLayout>
               </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin/content/services" 
+            element={
+              <Navigate to="/admin/content" replace />
             } 
           />
           <Route 
