@@ -57,7 +57,11 @@ function App() {
           <Route 
             path="/admin/services" 
             element={
-              <Navigate to="/admin/content/services" replace />
+              <ProtectedRoute requiredRoles={['editor', 'admin', 'super_admin']}>
+                <AdminLayout>
+                  <AdminContent defaultSection="services" />
+                </AdminLayout>
+              </ProtectedRoute>
             } 
           />
           <Route 
@@ -68,12 +72,6 @@ function App() {
                   <AdminContent />
                 </AdminLayout>
               </ProtectedRoute>
-            } 
-          />
-          <Route 
-            path="/admin/content/services" 
-            element={
-              <Navigate to="/admin/content" replace />
             } 
           />
           <Route 

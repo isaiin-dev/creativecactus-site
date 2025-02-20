@@ -78,11 +78,11 @@ interface ContentForm {
   scheduledFor?: Date;
 }
 
-export default function AdminContent() {
+export default function AdminContent({ defaultSection = 'hero' }: { defaultSection?: ContentSection } = {}) {
   const { t } = useTranslation();
   const { user } = useAuth();
   const [services, setServices] = React.useState<Service[]>([]);
-  const [activeSection, setActiveSection] = React.useState<ContentSection>('hero');
+  const [activeSection, setActiveSection] = React.useState<ContentSection>(defaultSection);
   const [content, setContent] = React.useState<ContentBlock | null>(null);
   const [versions, setVersions] = React.useState<ContentVersion[]>([]);
   const [loading, setLoading] = React.useState(true);
@@ -113,18 +113,22 @@ export default function AdminContent() {
   React.useEffect(() => {
     loadServices();
   }, []);
+  
+  // Manejar errores de red
+  const handleNetworkError = (error: any) => {
+    console.warn('Network error:', error);
+    setError('Network connection lost. Changes will be saved when connection is restored.');
+  };
 
   const loadServices = async () => {
     try {
       const data = await getServices();
-      if (!data) {
-        throw new Error('No services data available');
-      }
       setServices(data);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error loading services';
       setError(errorMessage);
       console.error(err);
+      handleNetworkError(err);
     } finally {
       setLoading(false);
     }

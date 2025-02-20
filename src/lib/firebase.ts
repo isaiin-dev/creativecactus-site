@@ -76,31 +76,170 @@ export interface ContentVersion {
 export interface ContentBlock {
   id: string;
   type: 'header' | 'footer' | 'hero' | 'services' | 'testimonials' | 'features';
-  data: any;
+  data: HeaderData | any;
   currentVersion: string;
   versions: ContentVersion[];
   lastModified: FirebaseFirestore.Timestamp;
   lastModifiedBy: string;
 }
 
+export interface HeaderData {
+  logo: {
+    url: string;
+    alt: string;
+    width?: number;
+    height?: number;
+  };
+  navigation: Array<{
+    id: string;
+    label: string;
+    path: string;
+    isExternal?: boolean;
+    order: number;
+    status: 'active' | 'inactive';
+  }>;
+  showLanguageSwitcher: boolean;
+  showAdminPortal: boolean;
+  metadata: {
+    lastModified: FirebaseFirestore.Timestamp;
+    lastModifiedBy: string;
+    version: number;
+  };
+}
+
+export const defaultHeaderData: HeaderData = {
+  logo: {
+    url: '',
+    alt: 'Creative Cactus',
+    width: 160,
+    height: 40
+  },
+  navigation: [
+    {
+      id: '1',
+      label: 'Home',
+      path: '/',
+      isExternal: false,
+      order: 0,
+      status: 'active'
+    },
+    {
+      id: '2',
+      label: 'About',
+      path: '/about',
+      isExternal: false,
+      order: 1,
+      status: 'active'
+    },
+    {
+      id: '3',
+      label: 'Services',
+      path: '/services',
+      isExternal: false,
+      order: 2,
+      status: 'active'
+    },
+    {
+      id: '4',
+      label: 'Contact',
+      path: '/contact',
+      isExternal: false,
+      order: 3,
+      status: 'active'
+    }
+  ],
+  showLanguageSwitcher: true,
+  showAdminPortal: true,
+  metadata: {
+    lastModified: serverTimestamp(),
+    lastModifiedBy: 'system',
+    version: 1
+  }
+};
+
+export const initializeHeaderCollection = async (userId: string): Promise<void> => {
+  try {
+    const headerRef = doc(db, 'content', 'header');
+    const headerDoc = await getDoc(headerRef);
+
+    if (!headerDoc.exists()) {
+      const initialData: ContentBlock = {
+        id: 'header',
+        type: 'header',
+        data: defaultHeaderData,
+        currentVersion: '',
+        versions: [],
+        lastModified: serverTimestamp(),
+        lastModifiedBy: userId
+      };
+
+      await setDoc(headerRef, initialData);
+      console.info('Header collection initialized successfully');
+    }
+  } catch (error) {
+    console.error('Error initializing header collection:', error);
+    throw new Error('Failed to initialize header collection');
+  }
+};
+
+export const validateHeaderData = (data: HeaderData): boolean => {
+  try {
+    // Validate logo
+    if (!data.logo || typeof data.logo.url !== 'string' || typeof data.logo.alt !== 'string') {
+      return false;
+    }
+
+    // Validate navigation items
+    if (!Array.isArray(data.navigation)) {
+      return false;
+    }
+
+    for (const item of data.navigation) {
+      if (!item.id || !item.label || !item.path || typeof item.order !== 'number') {
+        return false;
+      }
+    }
+
+    // Validate boolean flags
+    if (typeof data.showLanguageSwitcher !== 'boolean' || typeof data.showAdminPortal !== 'boolean') {
+      return false;
+    }
+
+    // Validate metadata
+    if (!data.metadata || !data.metadata.version || typeof data.metadata.version !== 'number') {
+      return false;
+    }
+
+    return true;
+  } catch (error) {
+    console.error('Header data validation error:', error);
+    return false;
+  }
+};
+
 export const getContentBlock = async (type: ContentBlock['type']): Promise<ContentBlock | null> => {
   try {
     const docRef = doc(db, 'content', type);
-    // Initialize the content block if it doesn't exist
     const docSnap = await getDoc(docRef);
+    
+    // Initialize with default data if document doesn't exist
     if (!docSnap.exists()) {
+      const contentData = type === 'header' ? defaultHeaderData : {};
       const initialData: ContentBlock = {
         id: type,
         type,
-        data: {},
+        data: contentData,
         currentVersion: '',
         versions: [],
         lastModified: serverTimestamp(),
         lastModifiedBy: 'system'
       };
+
+      // Crear el documento con los datos iniciales
       await setDoc(docRef, initialData);
       return initialData;
     }
+    
     const data = docSnap.data();
     return {
       ...data,
@@ -108,8 +247,18 @@ export const getContentBlock = async (type: ContentBlock['type']): Promise<Conte
       lastModified: data.lastModified || serverTimestamp()
     } as ContentBlock;
   } catch (error) {
-    console.error('Error fetching content block:', error);
-    return null;
+    console.error(`Error fetching ${type} content block:`, error);
+    throw error;
+  }
+};
+
+export const initializeHeaderIfNeeded = async (): Promise<ContentBlock> => {
+  try {
+    const headerBlock = await getContentBlock('header');
+    return headerBlock;
+  } catch (error) {
+    console.error('Error initializing header:', error);
+    throw error;
   }
 };
 
@@ -117,10 +266,16 @@ export const updateContentBlock = async (
   type: ContentBlock['type'],
   data: any,
   userId: string,
+  validate: boolean = true,
   status: ContentVersion['status'] = 'draft',
   scheduledFor?: Date
 ): Promise<void> => {
   try {
+    // Validate header data if required
+    if (type === 'header' && validate && !validateHeaderData(data)) {
+      throw new Error('Invalid header data structure');
+    }
+
     const contentRef = doc(db, 'content', type);
     const versionRef = doc(collection(db, 'content', type, 'versions'));
     
@@ -137,6 +292,16 @@ export const updateContentBlock = async (
     await setDoc(versionRef, version);
     
     if (status === 'published') {
+      // Update metadata for header
+      if (type === 'header') {
+        data.metadata = {
+          ...data.metadata,
+          lastModified: serverTimestamp(),
+          lastModifiedBy: userId,
+          version: (data.metadata?.version || 0) + 1
+        };
+      }
+
       await updateDoc(contentRef, {
         data,
         currentVersion: versionRef.id,
