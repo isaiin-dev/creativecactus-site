@@ -76,13 +76,68 @@ export interface ContentVersion {
 export interface ContentBlock {
   id: string;
   type: 'header' | 'footer' | 'hero' | 'services' | 'testimonials' | 'features';
-  data: HeaderData | any;
+  data: HeaderData | HeroData | TestimonialsData | any;
   currentVersion: string;
   versions: ContentVersion[];
   lastModified: FirebaseFirestore.Timestamp;
   lastModifiedBy: string;
 }
 
+export interface TestimonialItem {
+  id: string;
+  name: string;
+  position: string;
+  company: string;
+  photoUrl?: string;
+  testimonial: string;
+  rating: number;
+  status: 'active' | 'inactive';
+  publishedAt: FirebaseFirestore.Timestamp;
+  order: number;
+}
+
+export interface TestimonialsData {
+  items: TestimonialItem[];
+  metadata: {
+    lastModified: FirebaseFirestore.Timestamp;
+    lastModifiedBy: string;
+    version: number;
+  };
+}
+
+export const defaultTestimonialsData: TestimonialsData = {
+  items: [
+    {
+      id: '1',
+      name: 'Isabella Rodríguez',
+      position: 'CEO',
+      company: 'TechVision MX',
+      photoUrl: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      testimonial: 'Creative Cactus transformed our digital presence completely. Their strategic approach and creative solutions helped us achieve a 300% growth in online engagement.',
+      rating: 5,
+      status: 'active',
+      publishedAt: serverTimestamp(),
+      order: 0
+    },
+    {
+      id: '2',
+      name: 'Miguel Hernández',
+      position: 'Marketing Director',
+      company: 'InnovaMex',
+      photoUrl: 'https://images.unsplash.com/photo-1519244703995-f4e0f30006d5?ixlib=rb-1.2.1&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80',
+      testimonial: 'Working with Creative Cactus has been a game-changer for our business. Their team\'s expertise and dedication to our success exceeded all expectations.',
+      rating: 5,
+      status: 'active',
+      publishedAt: serverTimestamp(),
+      order: 1
+    }
+  ],
+  metadata: {
+    lastModified: serverTimestamp(),
+    lastModifiedBy: 'system',
+    version: 1
+  }
+};
 export interface HeaderData {
   logo: {
     url: string;
@@ -107,6 +162,63 @@ export interface HeaderData {
   };
 }
 
+export interface HeroData {
+  title: {
+    main: string;
+    creative: string;
+    solutions: string;
+  };
+  subtitle: string;
+  cta: {
+    primary: {
+      text: string;
+      link: string;
+    };
+    secondary: {
+      text: string;
+      link: string;
+    };
+  };
+  background: {
+    gradientStart: string;
+    gradientMiddle: string;
+    gradientEnd: string;
+  };
+  metadata: {
+    lastModified: FirebaseFirestore.Timestamp;
+    lastModifiedBy: string;
+    version: number;
+  };
+}
+
+export const defaultHeroData: HeroData = {
+  title: {
+    main: 'Grow Your Brand with',
+    creative: 'Creative',
+    solutions: 'Solutions'
+  },
+  subtitle: 'We transform your vision into digital success. Creative strategies, measurable results, and innovative solutions tailored for your business.',
+  cta: {
+    primary: {
+      text: 'Get Started',
+      link: '/contact'
+    },
+    secondary: {
+      text: 'Our Services',
+      link: '/services'
+    }
+  },
+  background: {
+    gradientStart: '#96C881',
+    gradientMiddle: '#1a1a1a',
+    gradientEnd: '#E4656E'
+  },
+  metadata: {
+    lastModified: serverTimestamp(),
+    lastModifiedBy: 'system',
+    version: 1
+  }
+};
 export const defaultHeaderData: HeaderData = {
   logo: {
     url: '',
