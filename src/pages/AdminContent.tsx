@@ -26,6 +26,7 @@ import {
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
 import { useAuth } from '../contexts/AuthContext';
 import ContentEditor from '../components/admin/ContentEditor';
+import ServiceForm from '../components/admin/ServiceForm';
 import { 
   ContentBlock, 
   ContentVersion,
@@ -93,7 +94,6 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
     data: {},
   });
   const [isServiceFormOpen, setIsServiceFormOpen] = React.useState(false);
-  const [serviceFormData, setServiceFormData] = React.useState<ServiceFormData>(initialServiceFormData);
   const [editingServiceId, setEditingServiceId] = React.useState<string | null>(null);
   const [imageFile, setImageFile] = React.useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = React.useState<string | null>(null);
@@ -156,20 +156,24 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
     }
   };
 
-  const handleServiceSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleServiceSubmit = async (data: ServiceFormData) => {
     setSaving(true);
     setError(null);
 
     try {
-      let imageUrl = serviceFormData.imageUrl;
-      if (imageFile) {
-        imageUrl = await uploadServiceImage(imageFile);
+      let imageUrl = '';
+      if (data.thumbnail) {
+        imageUrl = await uploadServiceImage(data.thumbnail);
       }
 
       const serviceData = {
-        ...serviceFormData,
+        title: data.name,
+        description: data.description,
+        category: data.category,
+        price: data.basePrice,
         imageUrl,
+        status: data.visibleInCatalog ? 'active' : 'inactive',
+        features: [],
         order: editingServiceId ? services.find(s => s.id === editingServiceId)?.order || 0 : services.length
       };
 
@@ -180,7 +184,8 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
       }
 
       await loadServices();
-      resetServiceForm();
+      setIsServiceFormOpen(false);
+      setEditingServiceId(null);
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error saving service';
       setError(errorMessage);
@@ -209,31 +214,10 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
   };
 
   const handleServiceEdit = (service: Service) => {
-    setServiceFormData({
-      title: service.title,
-      description: service.description,
-      icon: service.icon,
-      imageUrl: service.imageUrl,
-      price: service.price,
-      status: service.status,
-      category: service.category,
-      features: service.features
-    });
     setEditingServiceId(service.id);
     setIsServiceFormOpen(true);
     if (service.imageUrl) {
       setPreviewUrl(service.imageUrl);
-    }
-  };
-
-  const resetServiceForm = () => {
-    setServiceFormData(initialServiceFormData);
-    setEditingServiceId(null);
-    setIsServiceFormOpen(false);
-    setImageFile(null);
-    setPreviewUrl(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
     }
   };
 
@@ -466,6 +450,37 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
                   Add Service
                 </button>
               </div>
+
+              {/* Service Form Modal */}
+              {isServiceFormOpen && (
+                <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
+                  <div className="bg-[#1a1a1a] rounded-xl p-6 max-w-4xl w-full max-h-[90vh] overflow-y-auto">
+                    <div className="flex justify-between items-center mb-6">
+                      <h2 className="text-xl font-bold text-white">
+                        {editingServiceId ? 'Edit Service' : 'Add New Service'}
+                      </h2>
+                      <button
+                        onClick={() => {
+                          setIsServiceFormOpen(false);
+                          setEditingServiceId(null);
+                        }}
+                        className="text-gray-400 hover:text-white transition-colors"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
+                    </div>
+
+                    <ServiceForm
+                      onSubmit={handleServiceSubmit}
+                      onCancel={() => {
+                        setIsServiceFormOpen(false);
+                        setEditingServiceId(null);
+                      }}
+                      isLoading={saving}
+                    />
+                  </div>
+                </div>
+              )}
 
               <DragDropContext onDragEnd={handleDragEnd}>
                 <Droppable droppableId="services">
