@@ -3,6 +3,8 @@ import { ContentBlock, HeroData } from '../../lib/firebase';
 import HeaderEditor from './HeaderEditor';
 import HeroEditor from './HeroEditor';
 import TestimonialsEditor from './TestimonialsEditor';
+import FeaturesEditor from './FeaturesEditor';
+import FooterEditor from './FooterEditor';
 import TextEditor from './TextEditor';
 
 interface ContentEditorProps {
@@ -42,6 +44,24 @@ export default function ContentEditor({
     case 'testimonials':
       return (
         <TestimonialsEditor
+          data={content.data}
+          onChange={onChange}
+          onSave={() => {}}
+          previewMode={previewMode}
+        />
+      );
+    case 'features':
+      return (
+        <FeaturesEditor
+          data={content.data}
+          onChange={onChange}
+          onSave={() => {}}
+          previewMode={previewMode}
+        />
+      );
+    case 'footer':
+      return (
+        <FooterEditor
           data={content.data}
           onChange={onChange}
           onSave={() => {}}

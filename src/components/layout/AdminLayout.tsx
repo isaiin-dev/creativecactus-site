@@ -1,6 +1,6 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, X, LayoutDashboard, FolderKanban, Users, Building2, FileBox, DollarSign, BarChart3, Settings, Briefcase, Layout } from 'lucide-react';
+import { LogOut, LayoutDashboard, FolderKanban, Users, Building2, FileBox, DollarSign, BarChart3, Settings, Briefcase, Layout, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { logout } from '../../lib/firebase';
 import LanguageSwitcher from '../LanguageSwitcher';
@@ -92,35 +92,47 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   return (
     <div className="min-h-screen bg-[#121212] flex w-full">
       {/* Sidebar */}
-      <div
+      <aside
         className={`
-          h-screen bg-[#1a1a1a] border-r border-gray-800
-          transition-all duration-300 z-20
+          fixed md:sticky top-0 left-0 h-screen
+          bg-[#1a1a1a] border-r border-gray-800
+          transition-all duration-300 ease-in-out z-20
           ${isSidebarOpen ? 'w-64' : 'w-20'}
-          sticky top-0 left-0
+          flex flex-col
         `}
       >
-        <div className="p-4 flex items-center justify-between">
-          <img
-            src="/logo.png"
-            alt="Creative Cactus"
-            className="h-8 w-auto"
-          />
+        {/* Logo & Toggle */}
+        <div className="h-16 px-4 flex items-center justify-between border-b border-gray-800">
+          <div className="flex items-center w-full overflow-hidden">
+            <img
+              src="/logo.png"
+              alt="Creative Cactus"
+              className={`
+                h-8 w-auto
+                transition-transform duration-300
+                ${!isSidebarOpen && 'transform -translate-x-full'}
+              `}
+            />
+          </div>
           <button
             onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-            className="text-gray-400 hover:text-white transition-colors"
+            className={`
+              p-2 rounded-lg text-gray-400 hover:text-white
+              transition-colors hover:bg-[#242424]
+              flex-shrink-0 ml-2
+            `}
           >
             {isSidebarOpen ? (
-              <X className="h-5 w-5" />
+              <ChevronLeft className="h-5 w-5" />
             ) : (
-              <Menu className="h-5 w-5" />
+              <ChevronRight className="h-5 w-5" />
             )}
           </button>
         </div>
 
         {/* Navigation */}
-        <nav className="mt-8 px-3">
-          <div className="space-y-1">
+        <div className="flex-1 px-3 py-4 overflow-y-auto overflow-x-hidden">
+          <div className="space-y-1 relative">
             {navItems.map((item) => {
               const isVisible = user?.role && item.roles.includes(user.role);
               if (!isVisible) return null;
@@ -132,34 +144,39 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
                   to={item.path}
                   className={`
                     flex items-center gap-3 px-3 py-2 rounded-lg
-                    transition-colors
+                    transition-all duration-300
                     ${isActive 
                       ? 'bg-[#96C881] text-white' 
                       : 'text-gray-400 hover:text-white hover:bg-[#242424]'}
-                    ${!isSidebarOpen && 'justify-center'}
                   `}
                 >
-                  {item.icon}
-                  {isSidebarOpen && <span>{item.label}</span>}
+                  <div className="flex-shrink-0 w-5">
+                    {item.icon}
+                  </div>
+                  <span
+                    className={`
+                      whitespace-nowrap
+                      transition-all duration-300
+                      ${!isSidebarOpen ? 'hidden' : 'block'}
+                    `}
+                  >
+                    {item.label}
+                  </span>
                 </Link>
               );
             })}
           </div>
-        </nav>
-      </div>
+        </div>
+      </aside>
 
       {/* Main Content */}
-      <div className="flex-1 min-w-0">
+      <div className={`
+        flex-1 min-w-0 transition-all duration-300
+        ${isSidebarOpen ? 'md:ml-0' : 'md:ml-0'}
+      `}>
         {/* Top Bar */}
         <div className="bg-[#1a1a1a] border-b border-gray-800 p-4 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
-              onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-              className="md:hidden text-gray-400 hover:text-white transition-colors"
-            >
-              <Menu className="h-6 w-6" />
-            </button>
-          </div>
+          <div className="flex items-center gap-4" />
           
           <div className="flex items-center gap-4">
             <LanguageSwitcher />
