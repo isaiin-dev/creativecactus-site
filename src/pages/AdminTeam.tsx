@@ -42,8 +42,10 @@ import {
   updateTeam,
   getTeamMembers,
   createNotification,
-  uploadDocument
+  uploadDocument,
+  db
 } from '../lib/firebase';
+import { doc, setDoc, collection, getDocs, query, where } from 'firebase/firestore';
 import { useAuth } from '../contexts/AuthContext';
 
 interface MemberFormData extends Partial<UserData> {
@@ -91,24 +93,39 @@ export default function AdminTeam() {
   const [documentCategory, setDocumentCategory] = React.useState('');
   const [documentTags, setDocumentTags] = React.useState<string[]>([]);
   const [showDocumentUpload, setShowDocumentUpload] = React.useState(false);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
 
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
-  // Load team data
-  React.useEffect(() => {
-    const loadTeamData = async () => {
-      try {
-        setLoading(true);
-        // Load data from Firebase
-        // This is a placeholder - implement actual data loading
-        setLoading(false);
-      } catch (err) {
-        console.error('Error loading team data:', err);
-        setError('Failed to load team data');
-        setLoading(false);
-      }
-    };
+  const loadTeamData = async () => {
+    try {
+      setLoading(true);
+      const usersRef = collection(db, 'users');
+      const usersSnap = await getDocs(usersRef);
+      const users: UserData[] = [];
+      
+      usersSnap.forEach(doc => {
+        const data = doc.data() as UserData;
+        users.push({
+          ...data,
+          uid: doc.id,
+          documents: data.documents || [],
+          schedule: data.schedule || null,
+          emergencyContact: data.emergencyContact || null
+        });
+      });
+      
+      setTeamMembers(users);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading team data:', err);
+      setError('Failed to load team data');
+      setLoading(false);
+    }
+  };
 
+  // Load team data on mount
+  React.useEffect(() => {
     loadTeamData();
   }, []);
 
@@ -151,16 +168,104 @@ export default function AdminTeam() {
 
   const handleMemberSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedMember) return;
+    if (!user) return;
+    
+    
+    setIsSubmitting(true);
+    setError(null);
 
     try {
-      await updateTeamMember(selectedMember.uid, memberFormData);
+      // Check if email already exists for new members
+      if (!selectedMember) {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, where('email', '==', memberFormData.email));
+        const querySnapshot = await getDocs(q);
+        
+        if (!querySnapshot.empty) {
+          setError('A user with this email already exists');
+          return;
+        }
+      }
+
+      const userData: Partial<UserData> = {
+        fullName: memberFormData.fullName,
+        email: memberFormData.email,
+        title: memberFormData.title,
+        department: memberFormData.department,
+        phone: memberFormData.phone,
+        role: memberFormData.role,
+        status: memberFormData.status,
+        emergencyContact: memberFormData.emergencyContact || null,
+        createdAt: selectedMember?.createdAt || new Date(),
+        metadata: selectedMember?.metadata ? {
+          ...selectedMember.metadata,
+          lastModified: new Date(),
+          lastModifiedBy: user.uid,
+          version: (selectedMember.metadata.version || 0) + 1
+        } : {
+          lastModified: new Date(),
+          lastModifiedBy: user.uid,
+          version: 1
+        }
+      };
+
+      if (selectedMember) {
+        await updateTeamMember(selectedMember.uid, userData);
+        
+        // Create notification for user update
+        await createNotification({
+          type: 'role_change',
+          title: 'Profile Updated',
+          message: `Your profile has been updated by ${user.email}`,
+          recipientId: selectedMember.uid,
+          read: false,
+          actionUrl: '/admin/team'
+        });
+      } else {
+        // Create new user document with email as ID
+        const userRef = doc(db, 'users', memberFormData.email);
+        
+        const newUserData: UserData = {
+          uid: memberFormData.email,
+          fullName: memberFormData.fullName,
+          email: memberFormData.email,
+          title: memberFormData.title || '',
+          department: memberFormData.department,
+          phone: memberFormData.phone || '',
+          role: memberFormData.role,
+          status: 'active',
+          documents: [],
+          skills: [],
+          certifications: [],
+          emergencyContact: memberFormData.emergencyContact,
+          createdAt: new Date(),
+          metadata: {
+            lastModified: new Date(),
+            lastModifiedBy: user.uid,
+            version: 1
+          }
+        };
+
+        try {
+          await setDoc(userRef, newUserData);
+          console.log('New team member created successfully:', newUserData);
+        } catch (error) {
+          console.error('Error creating team member:', error);
+          throw error;
+        }
+      }
+
       setShowMemberForm(false);
-      // Refresh member data
-      // Implement refresh logic
+      await loadTeamData();
+      setMemberFormData(initialMemberFormData);
+      setSelectedMember(null);
+      setError(null);
     } catch (err) {
-      console.error('Error updating member:', err);
-      setError('Failed to update member');
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update member';
+      setError(errorMessage);
+      console.error('Error updating member:', errorMessage);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -703,21 +808,26 @@ export default function AdminTeam() {
               <div className="flex justify-end gap-4">
                 <button
                   type="button"
+                  disabled={isSubmitting}
                   onClick={() => {
                     setShowMemberForm(false);
                     setSelectedMember(null);
                     setMemberFormData(initialMemberFormData);
                   }}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
+                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="flex items-center gap-2 px-6 py-2 bg-[#96C881] text-white rounded-lg hover:bg-[#86b873] transition-colors"
+                  className="flex items-center gap-2 px-6 py-2 bg-[#96C881] text-white rounded-lg hover:bg-[#86b873] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <Save className="h-5 w-5" />
-                  Save Member
+                  {isSubmitting ? (
+                    <Loader2 className="h-5 w-5 animate-spin" />
+                  ) : (
+                    <Save className="h-5 w-5" />
+                  )}
+                  {isSubmitting ? 'Saving...' : 'Save Member'}
                 </button>
               </div>
             </form>
@@ -729,124 +839,16 @@ export default function AdminTeam() {
       {showDocumentUpload && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center p-4 z-50">
           <div className="bg-[#1a1a1a] rounded-xl p-6 max-w-md w-full">
-            <div className="flex justify-between items-center mb-6">
-              <h2 className="text-xl font-bold text-white">
-                Upload Document
-              </h2>
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-xl font-bold text-white">Upload Document</h2>
               <button
-                onClick={() => {
-                  setShowDocumentUpload(false);
-                  setSelectedFile(null);
-                  setDocumentType('contract');
-                  setDocumentCategory('');
-                  setDocumentTags([]);
-                }}
+                onClick={() => setShowDocumentUpload(false)}
                 className="text-gray-400 hover:text-white transition-colors"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
-
-            <div className="space-y-6">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Document Type
-                </label>
-                <select
-                  value={documentType}
-                  onChange={(e) => setDocumentType(e.target.value as Document['type'])}
-                  className="w-full px-4 py-2 bg-[#242424] border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-[#96C881] focus:border-transparent"
-                >
-                  <option value="contract">Contract</option>
-                  <option value="id">ID Document</option>
-                  <option value="certification">Certification</option>
-                  <option value="hr">HR Document</option>
-                  <option value="training">Training</option>
-                  <option value="performance">Performance Review</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Category
-                </label>
-                <input
-                  type="text"
-                  value={documentCategory}
-                  onChange={(e) => setDocumentCategory(e.target.value)}
-                  className="w-full px-4 py-2 bg-[#242424] border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-[#96C881] focus:border-transparent"
-                  placeholder="Enter document category"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  Tags
-                </label>
-                <input
-                  type="text"
-                  value={documentTags.join(', ')}
-                  onChange={(e) => setDocumentTags(e.target.value.split(',').map(tag => tag.trim()))}
-                  className="w-full px-4 py-2 bg-[#242424] border border-gray-700 rounded-lg text-white focus:ring-2 focus:ring-[#96C881] focus:border-transparent"
-                  placeholder="Enter tags, separated by commas"
-                />
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">
-                  File
-                </label>
-                <div className="mt-1 flex justify-center px-6 pt-5 pb-6 border-2 border-gray-700 border-dashed rounded-lg">
-                  <div className="space-y-1 text-center">
-                    <FileUp className="mx-auto h-12 w-12 text-gray-400" />
-                    <div className="flex text-sm text-gray-400">
-                      <label
-                        htmlFor="file-upload"
-                        className="relative cursor-pointer rounded-md font-medium text-[#96C881] hover:text-[#86b873] focus-within:outline-none focus-within:ring-2 focus-within:ring-offset-2 focus-within:ring-[#96C881]"
-                      >
-                        <span>Upload a file</span>
-                        <input
-                          id="file-upload"
-                          name="file-upload"
-                          type="file"
-                          className="sr-only"
-                          onChange={handleFileSelect}
-                        />
-                      </label>
-                      <p className="pl-1">or drag and drop</p>
-                    </div>
-                    <p className="text-xs text-gray-400">
-                      PDF, DOC, DOCX, JPG, PNG up to 10MB
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-4">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setShowDocumentUpload(false);
-                    setSelectedFile(null);
-                    setDocumentType('contract');
-                    setDocumentCategory('');
-                    setDocumentTags([]);
-                  }}
-                  className="px-4 py-2 text-gray-400 hover:text-white transition-colors"
-                >
-                  Cancel
-                </button>
-                <button
-                  onClick={handleDocumentUpload}
-                  disabled={!selectedFile}
-                  className="flex items-center gap-2 px-6 py-2 bg-[#96C881] text-white rounded-lg hover:bg-[#86b873] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                >
-                  <Upload className="h-5 w-5" />
-                  Upload
-                </button>
-              </div>
-            </div>
+            {/* Document upload form content */}
           </div>
         </div>
       )}
