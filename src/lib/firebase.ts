@@ -972,24 +972,23 @@ export const getContentBlock = async (type: ContentBlock['type']): Promise<Conte
     const docRef = doc(db, 'content', type);
     const docSnap = await getDoc(docRef);
     
-    // Initialize with default data if document doesn't exist
     if (!docSnap.exists()) {
-      const contentData = type === 'header' ? defaultHeaderData : {};
-      const initialData: ContentBlock = {
+      // Return default data based on content type
+      const defaultData: ContentBlock = {
         id: type,
         type,
-        data: contentData,
+        data: type === 'header' ? defaultHeaderData :
+              type === 'hero' ? defaultHeroData :
+              type === 'testimonials' ? defaultTestimonialsData :
+              type === 'features' ? defaultFeaturesData :
+              type === 'footer' ? defaultFooterData : {},
         currentVersion: '',
         versions: [],
-        lastModified: serverTimestamp(),
-        lastModifiedBy: 'system'
-      };
-
-      // Crear el documento con los datos iniciales
-      await setDoc(docRef, initialData);
-      return initialData;
+        lastModified: serverTimestamp()
+      }
+      return defaultData;
     }
-    
+
     const data = docSnap.data();
     return {
       ...data,
@@ -998,7 +997,19 @@ export const getContentBlock = async (type: ContentBlock['type']): Promise<Conte
     } as ContentBlock;
   } catch (error) {
     console.error(`Error fetching ${type} content block:`, error);
-    throw error;
+    // Return default data on error instead of throwing
+    return {
+      id: type,
+      type,
+      data: type === 'header' ? defaultHeaderData :
+            type === 'hero' ? defaultHeroData :
+            type === 'testimonials' ? defaultTestimonialsData :
+            type === 'features' ? defaultFeaturesData :
+            type === 'footer' ? defaultFooterData : {},
+      currentVersion: '',
+      versions: [],
+      lastModified: serverTimestamp()
+    };
   }
 };
 
@@ -1021,8 +1032,23 @@ export const updateContentBlock = async (
   scheduledFor?: Date
 ): Promise<void> => {
   try {
+    // Basic validation
+    if (!data || typeof data !== 'object') {
+      throw new Error('Invalid data structure');
+    }
+
+    // Ensure data has metadata
+    const versionData = {
+      ...data,
+      metadata: {
+        lastModified: serverTimestamp(),
+        lastModifiedBy: userId,
+        version: (data.metadata?.version || 0) + 1
+      }
+    };
+
     // Validate header data if required
-    if (type === 'header' && validate && !validateHeaderData(data)) {
+    if (type === 'header' && validate && !validateHeaderData(versionData)) {
       throw new Error('Invalid header data structure');
     }
 
@@ -1032,28 +1058,23 @@ export const updateContentBlock = async (
     const version: ContentVersion = {
       id: versionRef.id,
       contentId: type,
-      data,
-      createdAt: new Date(),
+      data: versionData,
+      createdAt: serverTimestamp(),
       createdBy: userId,
       status,
-      scheduledFor
+      scheduledFor: scheduledFor || null
     };
     
-    await setDoc(versionRef, version);
+    // Save version first
+    await setDoc(versionRef, {
+      ...version,
+      data: versionData
+    });
     
-    if (status === 'published') {
-      // Update metadata for header
-      if (type === 'header') {
-        data.metadata = {
-          ...data.metadata,
-          lastModified: serverTimestamp(),
-          lastModifiedBy: userId,
-          version: (data.metadata?.version || 0) + 1
-        };
-      }
-
+    // Update main document for drafts and published content
+    if (status === 'published' || status === 'draft') {
       await updateDoc(contentRef, {
-        data,
+        data: versionData,
         currentVersion: versionRef.id,
         lastModified: serverTimestamp(),
         lastModifiedBy: userId

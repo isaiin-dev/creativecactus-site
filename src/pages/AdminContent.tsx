@@ -271,19 +271,43 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
   const handleSave = async (status: ContentVersion['status'] = 'draft') => {
     if (!user) return;
     
+    // Validate required data
+    if (!form.type || !form.data) {
+      throw new Error('Invalid content data');
+    }
+
+    // Ensure data has the correct structure based on content type
+    const validatedData = {
+      ...form.data,
+      metadata: {
+        lastModified: new Date(),
+        lastModifiedBy: user.uid,
+        version: (content?.data?.metadata?.version || 0) + 1
+      }
+    };
+
     setSaving(true);
     try {
       await updateContentBlock(
         form.type,
-        form.data,
+        validatedData,
         user.uid,
+        true, // validate
         status,
         form.scheduledFor
       );
       
+      // Reload content after saving to get latest version
       await loadContent(form.type);
+
+      // Clear form state after successful save
+      setForm(prev => ({
+        ...prev,
+        data: validatedData
+      }));
     } catch (error) {
-      console.error('Error saving content:', error);
+      console.error('Error updating content block:', error);
+      throw error;
     } finally {
       setSaving(false);
     }
@@ -575,6 +599,7 @@ export default function AdminContent({ defaultSection = 'hero' }: { defaultSecti
             <ContentEditor
               content={content}
               onChange={(data) => setForm(prev => ({ ...prev, data }))}
+              onSave={handleSave}
               previewMode={previewMode}
             />
           )}
