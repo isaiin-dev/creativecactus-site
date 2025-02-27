@@ -10,6 +10,7 @@ import AdminLogin from './pages/AdminLogin';
 import AdminDashboard from './pages/AdminDashboard';
 import AdminServices from './pages/AdminServices';
 import AdminContent from './pages/AdminContent';
+import Services from './pages/Services';
 import AdminTeam from './pages/AdminTeam';
 import { useTranslation } from 'react-i18next';
 import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
@@ -41,6 +42,7 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/about" element={<About />} />
+          <Route path="/services" element={<Services />} />
           
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLogin />} />

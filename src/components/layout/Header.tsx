@@ -108,13 +108,13 @@ export default function Header() {
           <nav className="hidden md:flex items-center space-x-8">
             {headerData?.navigation
               ?.filter(item => item.status === 'active')
-              ?.sort((a, b) => a.order - b.order)
-              ?.map(item => (
+              .sort((a, b) => a.order - b.order)
+              .map(item => (
                 <Link
                   key={item.id}
                   to={item.path}
                   className="text-gray-300 hover:text-[#E4656E] transition-colors"
-                  {...(item.isExternal ? {
+                  {...(item.isExternal && item.path.startsWith('http') ? {
                     target: '_blank',
                     rel: 'noopener noreferrer'
                   } : {})}
