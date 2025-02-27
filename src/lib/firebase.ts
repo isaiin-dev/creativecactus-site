@@ -967,14 +967,28 @@ export const validateHeaderData = (data: HeaderData): boolean => {
   }
 };
 
+// Cache duration in milliseconds (5 minutes)
+const CACHE_DURATION = 300000;
+
+// In-memory cache
+const contentCache = new Map<string, {
+  data: ContentBlock;
+  timestamp: number;
+}>();
+
 export const getContentBlock = async (type: ContentBlock['type']): Promise<ContentBlock | null> => {
   try {
+    // Check cache first
+    const cached = contentCache.get(type);
+    if (cached && Date.now() - cached.timestamp < CACHE_DURATION) {
+      return cached.data;
+    }
+
     const docRef = doc(db, 'content', type);
     const docSnap = await getDoc(docRef);
     
     if (!docSnap.exists()) {
-      // Return default data based on content type
-      const defaultData: ContentBlock = {
+      const data: ContentBlock = {
         id: type,
         type,
         data: type === 'header' ? defaultHeaderData :
@@ -986,30 +1000,43 @@ export const getContentBlock = async (type: ContentBlock['type']): Promise<Conte
         versions: [],
         lastModified: serverTimestamp()
       }
-      return defaultData;
+      
+      // Save default data to Firestore
+      await setDoc(docRef, data);
+      
+      // Update cache
+      contentCache.set(type, {
+        data,
+        timestamp: Date.now()
+      });
+      
+      return data;
     }
 
     const data = docSnap.data();
-    return {
+    const contentBlock = {
       ...data,
       id: docSnap.id,
       lastModified: data.lastModified || serverTimestamp()
     } as ContentBlock;
+    
+    // Update cache
+    contentCache.set(type, {
+      data: contentBlock,
+      timestamp: Date.now()
+    });
+    
+    return contentBlock;
   } catch (error) {
     console.error(`Error fetching ${type} content block:`, error);
-    // Return default data on error instead of throwing
-    return {
-      id: type,
-      type,
-      data: type === 'header' ? defaultHeaderData :
-            type === 'hero' ? defaultHeroData :
-            type === 'testimonials' ? defaultTestimonialsData :
-            type === 'features' ? defaultFeaturesData :
-            type === 'footer' ? defaultFooterData : {},
-      currentVersion: '',
-      versions: [],
-      lastModified: serverTimestamp()
-    };
+    
+    // Check cache on error
+    const cached = contentCache.get(type);
+    if (cached) {
+      return cached.data;
+    }
+    
+    throw error; // Let components handle the error
   }
 };
 
@@ -1282,4 +1309,4 @@ export const uploadServiceImage = async (file: File) => {
   const storageRef = ref(storage, `services/${Date.now()}_${file.name}`);
   await uploadBytes(storageRef, file);
   return getDownloadURL(storageRef);
-};
+}

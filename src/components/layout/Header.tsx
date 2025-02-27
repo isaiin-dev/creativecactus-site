@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu } from 'lucide-react';
+import { Menu, AlertCircle, Loader2 } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import LanguageSwitcher from '../LanguageSwitcher';
-import { getContentBlock, HeaderData } from '../../lib/firebase';
+import { getContentBlock, HeaderData, defaultHeaderData } from '../../lib/firebase';
 
 export default function Header() {
   const [isMenuOpen, setIsMenuOpen] = React.useState(false);
@@ -11,124 +11,41 @@ export default function Header() {
   const [headerData, setHeaderData] = React.useState<HeaderData | null>(null);
   const [error, setError] = React.useState<string | null>(null);
   const [isLoading, setIsLoading] = React.useState(true);
+  const [retryCount, setRetryCount] = React.useState(0);
+  const maxRetries = 3;
+  const retryDelay = 1000; // 1 second
 
-  // Fetch header data on mount and periodically refresh
   React.useEffect(() => {
     const fetchHeaderData = async () => {
       setIsLoading(true);
+      setError(null);
+      
       try {
         const contentBlock = await getContentBlock('header');
-        if (contentBlock?.data) {
+        
+        if (contentBlock && contentBlock.data) {
           setHeaderData(contentBlock.data as HeaderData);
-          setError(null);
-        } else {
-          // Use default header data if none exists
-          setHeaderData({
-            logo: {
-              url: '/logo.png',
-              alt: 'Creative Cactus',
-              width: 160,
-              height: 40
-            },
-            navigation: [
-              {
-                id: '1',
-                label: t('nav.home'),
-                path: '/',
-                isExternal: false,
-                order: 0,
-                status: 'active'
-              },
-              {
-                id: '2',
-                label: t('nav.about'),
-                path: '/about',
-                isExternal: false,
-                order: 1,
-                status: 'active'
-              },
-              {
-                id: '3',
-                label: t('nav.services'),
-                path: '/services',
-                isExternal: false,
-                order: 2,
-                status: 'active'
-              },
-              {
-                id: '4',
-                label: t('nav.contact'),
-                path: '/contact',
-                isExternal: false,
-                order: 3,
-                status: 'active'
-              }
-            ],
-            showLanguageSwitcher: true,
-            showAdminPortal: true,
-            metadata: {
-              lastModified: new Date(),
-              lastModifiedBy: 'system',
-              version: 1
-            }
-          });
+          setRetryCount(0); // Reset retry count on success
         }
-      } catch (error) {
-        console.error('Error fetching header data:', error);
-        // Use default header data on error
-        setHeaderData({
-          logo: {
-            url: '/logo.png',
-            alt: 'Creative Cactus'
-          },
-          navigation: [
-            {
-              id: '1',
-              label: t('nav.home'),
-              path: '/',
-              isExternal: false,
-              order: 0,
-              status: 'active'
-            },
-            {
-              id: '2',
-              label: t('nav.about'),
-              path: '/about',
-              isExternal: false,
-              order: 1,
-              status: 'active'
-            },
-            {
-              id: '3',
-              label: t('nav.services'),
-              path: '/services',
-              isExternal: false,
-              order: 2,
-              status: 'active'
-            },
-            {
-              id: '4',
-              label: t('nav.contact'),
-              path: '/contact',
-              isExternal: false,
-              order: 3,
-              status: 'active'
-            }
-          ],
-          showLanguageSwitcher: true,
-          showAdminPortal: true,
-          metadata: {
-            lastModified: new Date(),
-            lastModifiedBy: 'system',
-            version: 1
-          }
-        });
+      } catch (err) {
+        console.error('Error fetching header data:', err);
+        
+        if (retryCount < maxRetries) {
+          // Retry with exponential backoff
+          setTimeout(() => {
+            setRetryCount(prev => prev + 1);
+            fetchHeaderData();
+          }, retryDelay * Math.pow(2, retryCount));
+        } else {
+          setError('Failed to load header data');
+          // Use default data as fallback
+          setHeaderData(defaultHeaderData);
+        }
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Initial fetch
     fetchHeaderData();
 
     // Refresh every 5 minutes
@@ -136,6 +53,35 @@ export default function Header() {
 
     return () => clearInterval(interval);
   }, [t]);
+  
+  if (isLoading) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center">
+              <Loader2 className="h-8 w-8 text-[#96C881] animate-spin" />
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
+  
+  if (error) {
+    return (
+      <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/80 backdrop-blur-md border-b border-gray-800">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center py-4">
+            <div className="flex items-center gap-2 text-red-500">
+              <AlertCircle className="h-5 w-5" />
+              {error}
+            </div>
+          </div>
+        </div>
+      </header>
+    );
+  }
 
   return (
     <header className="fixed top-0 left-0 right-0 z-50 bg-[#121212]/80 backdrop-blur-md border-b border-gray-800">

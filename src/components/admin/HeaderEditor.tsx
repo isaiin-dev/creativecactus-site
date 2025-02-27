@@ -1,18 +1,30 @@
 import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { 
-  Link as LinkIcon, 
-  Plus, 
-  Trash2, 
-  GripVertical,
+  Save,
+  Loader2,
+  AlertCircle,
+  Plus,
   Image as ImageIcon,
   Globe,
   X,
-  Loader2,
-  AlertCircle
+  CheckCircle2,
+  RotateCcw,
+  GripVertical,
+  Trash2,
+  Link as LinkIcon
 } from 'lucide-react';
 import { DragDropContext, Droppable, Draggable } from '@hello-pangea/dnd';
-import { HeaderData, defaultHeaderData, initializeHeaderIfNeeded } from '../../lib/firebase';
+import { HeaderData, defaultHeaderData, updateContentBlock } from '../../lib/firebase';
+
+interface NavItem {
+  id: string;
+  label: string;
+  path: string;
+  isExternal?: boolean;
+  order: number;
+  status: 'active' | 'inactive';
+}
 
 interface HeaderEditorProps {
   data?: HeaderData;
@@ -20,20 +32,6 @@ interface HeaderEditorProps {
   onSave: () => void;
   previewMode?: boolean;
 }
-
-interface NavItem {
-  id: string;
-  label: string;
-  path: string;
-  isExternal?: boolean;
-}
-
-const defaultNavItem: NavItem = {
-  id: '',
-  label: '',
-  path: '',
-  isExternal: false
-};
 
 export default function HeaderEditor({ 
   data, 
@@ -44,6 +42,8 @@ export default function HeaderEditor({
   const [headerData, setHeaderData] = React.useState<HeaderData>(defaultHeaderData);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  const [saving, setSaving] = React.useState(false);
+  const [hasChanges, setHasChanges] = React.useState(false);
   const { t } = useTranslation();
   const [editingNavItem, setEditingNavItem] = React.useState<NavItem | null>(null);
   const [showNavItemForm, setShowNavItemForm] = React.useState(false);
@@ -57,6 +57,7 @@ export default function HeaderEditor({
         ...data,
         navigation: data.navigation || defaultHeaderData.navigation
       });
+      setHasChanges(false);
     }
     setLoading(false);
   }, [data]);
@@ -71,7 +72,45 @@ export default function HeaderEditor({
 
   const handleChange = (newData: HeaderData) => {
     setHeaderData(newData);
+    setHasChanges(true);
     onChange(newData);
+  };
+
+  // Warn about unsaved changes
+  React.useEffect(() => {
+    const handleBeforeUnload = (e: BeforeUnloadEvent) => {
+      if (hasChanges) {
+        e.preventDefault();
+        e.returnValue = '';
+      }
+    };
+
+    window.addEventListener('beforeunload', handleBeforeUnload);
+    return () => window.removeEventListener('beforeunload', handleBeforeUnload);
+  }, [hasChanges]);
+
+  const handleSave = async () => {
+    if (!hasChanges) return;
+    
+    setSaving(true);
+    setError(null);
+    
+    try {
+      await onSave();
+      setHasChanges(false);
+    } catch (err) {
+      setError('Failed to save changes. Please try again.');
+      console.error('Error saving header:', err);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleReset = () => {
+    if (window.confirm('Are you sure you want to reset all changes?')) {
+      setHeaderData(defaultHeaderData);
+      setHasChanges(true);
+    }
   };
 
   const handleLogoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -442,6 +481,38 @@ export default function HeaderEditor({
           </div>
         </div>
       )}
+
+      {/* Save and Reset Actions */}
+      <div className="fixed bottom-0 left-0 right-0 bg-[#1a1a1a] border-t border-gray-800 p-4 z-50">
+        <div className="max-w-7xl mx-auto flex justify-end items-center gap-4">
+          {error && (
+            <div className="flex items-center gap-2 text-red-500">
+              <AlertCircle className="h-5 w-5" />
+              <span>{error}</span>
+            </div>
+          )}
+          <button
+            onClick={handleReset}
+            disabled={!hasChanges}
+            className="flex items-center gap-2 px-4 py-2 bg-[#242424] text-white rounded-lg hover:bg-[#2a2a2a] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            <RotateCcw className="h-5 w-5" />
+            Reset
+          </button>
+          <button
+            onClick={handleSave}
+            disabled={!hasChanges || saving}
+            className="flex items-center gap-2 px-6 py-2 bg-[#96C881] text-white rounded-lg hover:bg-[#86b873] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {saving ? (
+              <Loader2 className="h-5 w-5 animate-spin" />
+            ) : (
+              <Save className="h-5 w-5" />
+            )}
+            Save Changes
+          </button>
+        </div>
+      </div>
     </div>
   );
 }
