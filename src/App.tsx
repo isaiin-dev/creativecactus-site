@@ -14,7 +14,20 @@ import Services from './pages/Services';
 import Contact from './pages/Contact';
 import AdminTeam from './pages/AdminTeam';
 import { useTranslation } from 'react-i18next';
-import { ArrowRight, Brush, Code, LineChart, MessageSquare, Rocket, Zap } from 'lucide-react';
+import { 
+  ArrowRight, 
+  Brush, 
+  Code, 
+  LineChart, 
+  MessageSquare, 
+  Rocket, 
+  Zap,
+  Star,
+  Users,
+  Video,
+  Megaphone,
+  CheckCircle2
+} from 'lucide-react';
 
 const useAdminShortcut = () => {
   React.useEffect(() => {
@@ -142,54 +155,96 @@ function App() {
               <section className="py-20 px-4 bg-[#1a1a1a]">
               <div className="max-w-7xl mx-auto">
                 <div className="text-center mb-16">
-                  <h2 className="text-4xl font-bold mb-4 text-white">{t('services.title')}</h2>
+                  <span className="text-[#96C881] text-sm font-medium mb-2 block">NUESTROS SERVICIOS</span>
+                  <h2 className="text-4xl md:text-5xl font-bold mb-6 text-white">
+                    Soluciones que <span className="text-[#96C881]">Impulsan</span> tu Crecimiento
+                  </h2>
                   <p className="text-gray-300 max-w-2xl mx-auto">
-                    {t('services.subtitle')}
+                    Más de 200 empresas ya han transformado su presencia digital con nuestras soluciones.
+                    Descubre cómo podemos ayudarte a alcanzar tus objetivos.
                   </p>
                 </div>
                 
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 relative">
+                  {/* Success Stats */}
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-[#96C881]/10 backdrop-blur-sm border border-[#96C881]/20 rounded-full py-2 px-6 flex items-center gap-4">
+                    <div className="flex items-center gap-2">
+                      <CheckCircle2 className="h-5 w-5 text-[#96C881]" />
+                      <span className="text-white">98% Satisfacción</span>
+                    </div>
+                    <div className="h-4 w-px bg-gray-700" />
+                    <div className="flex items-center gap-2">
+                      <Users className="h-5 w-5 text-[#96C881]" />
+                      <span className="text-white">200+ Clientes</span>
+                    </div>
+                  </div>
+
                   {[
                     {
+                      icon: <MessageSquare className="h-8 w-8 text-[#96C881]" />,
+                      title: "Social Media",
+                      description: "Estrategias que conectan con tu audiencia y generan resultados medibles. Nuestros clientes han visto un aumento promedio del 300% en engagement.",
+                      stats: "300% más engagement"
+                    },
+                    {
                       icon: <Brush className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.brandDesign.title'),
-                      description: t('services.items.brandDesign.description')
+                      title: "Diseño Gráfico",
+                      description: "Diseños que capturan la esencia de tu marca y la hacen memorable. Más de 500 marcas han transformado su imagen con nosotros.",
+                      stats: "500+ marcas diseñadas"
                     },
                     {
                       icon: <Code className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.webDev.title'),
-                      description: t('services.items.webDev.description')
+                      title: "Desarrollo Web",
+                      description: "Sitios web que convierten visitantes en clientes. Nuestras soluciones han ayudado a empresas a duplicar sus ventas online.",
+                      stats: "2x ventas online"
                     },
                     {
-                      icon: <LineChart className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.digitalMarketing.title'),
-                      description: t('services.items.digitalMarketing.description')
+                      icon: <Megaphone className="h-8 w-8 text-[#96C881]" />,
+                      title: "Campañas",
+                      description: "Campañas publicitarias que maximizan tu ROI. Nuestros clientes logran un retorno promedio de 10x su inversión.",
+                      stats: "10x ROI promedio"
                     },
                     {
-                      icon: <MessageSquare className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.socialMedia.title'),
-                      description: t('services.items.socialMedia.description')
-                    },
-                    {
-                      icon: <Zap className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.content.title'),
-                      description: t('services.items.content.description')
-                    },
-                    {
-                      icon: <Rocket className="h-8 w-8 text-[#96C881]" />,
-                      title: t('services.items.seo.title'),
-                      description: t('services.items.seo.description')
+                      icon: <Video className="h-8 w-8 text-[#96C881]" />,
+                      title: "Videomarketing",
+                      description: "Contenido audiovisual que cautiva y convierte. Más de 1 millón de visualizaciones generadas para nuestros clientes.",
+                      stats: "1M+ visualizaciones"
                     }
                   ].map((service, index) => (
                     <div 
                       key={index}
-                      className="p-6 rounded-2xl bg-[#242424] border border-gray-800 hover:border-[#96C881] transition-colors"
+                      className="group p-6 rounded-2xl bg-[#242424] border border-gray-800 hover:border-[#96C881] transition-all duration-300 hover:-translate-y-1"
                     >
-                      <div className="mb-4">{service.icon}</div>
-                      <h3 className="text-xl font-semibold mb-2 text-white">{service.title}</h3>
-                      <p className="text-gray-300">{service.description}</p>
+                      <div className="mb-4 transform group-hover:scale-110 transition-transform">
+                        {service.icon}
+                      </div>
+                      <h3 className="text-xl font-semibold mb-2 text-white group-hover:text-[#96C881] transition-colors">
+                        {service.title}
+                      </h3>
+                      <p className="text-gray-300 mb-4">{service.description}</p>
+                      <div className="flex items-center justify-between">
+                        <span className="text-[#96C881] text-sm font-medium">{service.stats}</span>
+                        <a 
+                          href={`/services#${service.title.toLowerCase().replace(/\s+/g, '-')}`}
+                          className="text-gray-400 hover:text-white transition-colors flex items-center gap-1 group/link"
+                        >
+                          Saber más
+                          <ArrowRight className="h-4 w-4 group-hover/link:translate-x-1 transition-transform" />
+                        </a>
+                      </div>
                     </div>
                   ))}
+                </div>
+                
+                {/* CTA */}
+                <div className="mt-12 text-center">
+                  <a 
+                    href="/services" 
+                    className="inline-flex items-center gap-2 px-8 py-3 bg-[#96C881] text-white rounded-full hover:bg-[#86b873] transition-colors group"
+                  >
+                    Explorar Todos los Servicios
+                    <ArrowRight className="h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                  </a>
                 </div>
               </div>
               </section>
